@@ -105,7 +105,7 @@ function Gatherer_OnLoad()
 	this:RegisterEvent("SPELLCAST_START");
 	this:RegisterEvent("SPELLCAST_STOP");
 	this:RegisterEvent("SPELLCAST_FAILED");
-	this:RegisterEvent("CHAT_ADDON_MSG");
+	this:RegisterEvent("CHAT_MSG_ADDON");
 
 	-- Events for off world non processing
 	this:RegisterEvent("PLAYER_ENTERING_WORLD");
