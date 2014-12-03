@@ -110,6 +110,7 @@ function Gatherer_OnLoad()
 	this:RegisterEvent("SPELLCAST_START");
 	this:RegisterEvent("SPELLCAST_STOP");
 	this:RegisterEvent("SPELLCAST_FAILED");
+	this:RegisterEvent("CHAT_ADDON_MSG");
 
 	-- Events for off world non processing
 	this:RegisterEvent("PLAYER_ENTERING_WORLD");
@@ -169,6 +170,14 @@ function Gatherer_Command(command)
 			GathererUI_HideOptions();
 		else
 			GathererUI_ShowOptions();
+		end
+	elseif (cmd == "debug") then
+		if (not param or param == "" or param == "on") then
+			SETTINGS.debug = true;
+			Gatherer_ChatPrint("Debug messages enabled");
+		elseif (param == "off") then
+			SETTINGS.debug = false;
+			Gatherer_ChatPrint("Debug messages disabled");
 		end
 	elseif (cmd == "report" ) then
 		showGathererInfo(1);
@@ -403,6 +412,10 @@ function Gatherer_OnEvent(event)
 	-- process chatmessages
 	elseif ( event == "CHAT_MSG_SPELL_SELF_BUFF" ) then
 		Gatherer_ReadBuff(event);
+
+	-- process AddOn communication
+	elseif strfind(event, "CHAT_MSG_ADDON") then
+		Gatherer_AddonMessageEvent(arg1, arg2, arg3);
 
 	-- process tooltips text for 1.12
 	elseif ( event == "SPELLCAST_START" ) then
@@ -1462,6 +1475,69 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 	end
 end
 
+function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
+	local hPos, gatherData;
+	if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
+	if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
+	if (not GatherItems[gatherC][gatherZ][gather]) then GatherItems[gatherC][gatherZ][gather] = { }; end
+
+	local found = 0;
+	local lastGather = 0;
+	local first_hole = 0;
+	local count = 0;
+	local closest = 0;
+	for hPos, gatherData in GatherItems[gatherC][gatherZ][gather] do
+		count = count + 1;
+		if ( first_hole == 0 and hPos ~= count ) then
+			first_hole = count;
+		end
+		local dist, deltaX, deltaY = Gatherer_Distance(gatherX,gatherY, gatherData.x,gatherData.y);
+		local maxCheckDist = 0.5;
+		if ( gatherEventType and gatherEventType == 2 ) then maxCheckDist = 1; end
+		if ((dist < maxCheckDist) and ((closest == 0) or (closest > dist))) then -- same gather
+			gatherX = (gatherX + gatherData.x) / 2;
+			gatherY = (gatherY + gatherData.y) / 2;
+			closest = dist;
+			found = hPos;
+		end
+		if (hPos > lastGather) then
+			lastGather = hPos;
+		end
+	end
+	if (found == 0 and first_hole == 0) then -- need to create a new one (at hPos+1)
+		found = lastGather+1;
+	elseif ( found == 0 and first_hole ~= 0 ) then -- not found but there's a hole, let's fill it
+		found = first_hole;
+	end
+
+	local gatherCount = 1;
+	if ( gatherEventType and gatherEventType == 1 ) 
+	then
+		if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
+			GatherItems[gatherC][gatherZ][gather][found] = { };
+			gatherCount = 0;
+		else
+			gatherCount = GatherItems[gatherC][gatherZ][gather][found].count;
+		end
+	else
+		if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
+			GatherItems[gatherC][gatherZ][gather][found] = { };
+		else
+			gatherCount = GatherItems[gatherC][gatherZ][gather][found].count + 1;
+		end
+	end
+
+	-- Round off those coordinates
+	gatherX = math.floor(gatherX * 100)/100;
+	gatherY = math.floor(gatherY * 100)/100;
+
+	GatherItems[gatherC][gatherZ][gather][found].x = gatherX;
+	GatherItems[gatherC][gatherZ][gather][found].y = gatherY;
+	GatherItems[gatherC][gatherZ][gather][found].gtype = gatherType;
+	GatherItems[gatherC][gatherZ][gather][found].count = gatherCount;
+	GatherItems[gatherC][gatherZ][gather][found].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+end
+
 -- this function can be used as an interface by other addons to record things
 -- in Gatherer's database, though display is still based only on what is defined
 -- in Gatherer items and icons tables.
@@ -1493,68 +1569,8 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 		GatherItems = { };
 	end
 
-	local function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
-		local hPos, gatherData;
-		if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
-		if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
-		if (not GatherItems[gatherC][gatherZ][gather]) then GatherItems[gatherC][gatherZ][gather] = { }; end
-	
-		local found = 0;
-		local lastGather = 0;
-		local first_hole = 0;
-		local count = 0;
-		local closest = 0;
-		for hPos, gatherData in GatherItems[gatherC][gatherZ][gather] do
-			count = count + 1;
-			if ( first_hole == 0 and hPos ~= count ) then
-				first_hole = count;
-			end
-			local dist, deltaX, deltaY = Gatherer_Distance(gatherX,gatherY, gatherData.x,gatherData.y);
-			local maxCheckDist = 0.5;
-			if ( gatherEventType and gatherEventType == 2 ) then maxCheckDist = 1; end
-			if ((dist < maxCheckDist) and ((closest == 0) or (closest > dist))) then -- same gather
-				gatherX = (gatherX + gatherData.x) / 2;
-				gatherY = (gatherY + gatherData.y) / 2;
-				closest = dist;
-				found = hPos;
-			end
-			if (hPos > lastGather) then
-				lastGather = hPos;
-			end
-		end
-		if (found == 0 and first_hole == 0) then -- need to create a new one (at hPos+1)
-			found = lastGather+1;
-		elseif ( found == 0 and first_hole ~= 0 ) then -- not found but there's a hole, let's fill it
-			found = first_hole;
-		end
-	
-		local gatherCount = 1;
-		if ( gatherEventType and gatherEventType == 1 ) 
-		then
-			if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
-				GatherItems[gatherC][gatherZ][gather][found] = { };
-				gatherCount = 0;
-			else
-				gatherCount = GatherItems[gatherC][gatherZ][gather][found].count;
-			end
-		else
-			if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
-				GatherItems[gatherC][gatherZ][gather][found] = { };
-			else
-				gatherCount = GatherItems[gatherC][gatherZ][gather][found].count + 1;
-			end
-		end
-
-		-- Round off those coordinates
-		gatherX = math.floor(gatherX * 100)/100;
-		gatherY = math.floor(gatherY * 100)/100;
-	
-		GatherItems[gatherC][gatherZ][gather][found].x = gatherX;
-		GatherItems[gatherC][gatherZ][gather][found].y = gatherY;
-		GatherItems[gatherC][gatherZ][gather][found].gtype = gatherType;
-		GatherItems[gatherC][gatherZ][gather][found].count = gatherCount;
-		GatherItems[gatherC][gatherZ][gather][found].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
-	end
+	-- Broadcast to guild
+	Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
 
 	Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType);
 	Gatherer_OnUpdate(0,true);

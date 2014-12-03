@@ -9,6 +9,7 @@
 	<Script file="GatherIcons.lua"/>
 	<Script file="Gatherer.lua"/>
 	<Script file="GatherBase.lua"/>
+	<Script file="GatherBroadcast.lua"/>
 
 	<Frame name="Gatherer" parent="UIParent">
 		<Size>

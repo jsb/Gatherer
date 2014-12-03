@@ -65,6 +65,9 @@ Default_Settings = {
 	-- min skill filters
 	["minSetOreSkill"] = nil,
 	["minSetHerbSkill"] = nil,
+
+	-- debug
+	["debug"] = false,
 }
 
 --set per gather type defaults
