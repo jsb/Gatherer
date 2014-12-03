@@ -3,7 +3,6 @@
 
 GATHERER_VERSION="2.99.0.0284";
 
--- Revision: $Id: Gatherer.lua 284 2006-09-14 22:56:01Z esamynn $
 --
 -- Look, seriously a full half of this code is from MapNotes.
 -- The only reason I pinched it and put it in here is I couldn't

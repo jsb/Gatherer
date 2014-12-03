@@ -1,7 +1,6 @@
 --[[
 
 	Icon set definitions
-	Revision: $Id: GatherIcons.lua 284 2006-09-14 22:56:01Z esamynn $
 
 ]]
 

@@ -1,7 +1,6 @@
 --[[
 	Localization stings for Gatherer config UI
 	english set by default, localized versions overwrite the variables.
-	Revision: $Id: UI_localization.lua 284 2006-09-14 22:56:01Z esamynn $
 	
 	ToDo:
 		- Missing German strings

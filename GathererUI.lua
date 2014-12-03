@@ -1,6 +1,5 @@
 --[[
 	GUI for Gatherer (by Islorgris, original idea and most of the base UI code came from bcui_TrackingMenu)
-	Revision: $Id: GathererUI.lua 284 2006-09-14 22:56:01Z esamynn $
 ]]
 
 -- Counter for fixed item count

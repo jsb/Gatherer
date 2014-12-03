@@ -1,6 +1,5 @@
 --[[
 	Gatherer Report/Search UI
-	Revision: $Id: GathererInfo.lua 284 2006-09-14 22:56:01Z esamynn $
 ]]--
 
 -- Scrolling variables

@@ -2,7 +2,6 @@
 
 	File containing localized strings
 	for English, French, German and Chinese versions, defaults to English
-	Revision: $Id: localization.lua 284 2006-09-14 22:56:01Z esamynn $
 	
 	Processed locales: french (frFR), german (deDE), simplified chinese (zhCN), english (US or GB, default)
 ]]

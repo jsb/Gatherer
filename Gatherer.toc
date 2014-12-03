@@ -8,7 +8,6 @@
 ## Notes-deDE: Gatherer, zeigt gesammelte Krauter und Erze auf der Minikarte und Weltkarte an
 ## SavedVariables: GatherItems, Gatherer_SavedSettings_AccountWide
 ## SavedVariablesPerCharacter: Gatherer_SavedSettings_PerCharacter
-## Revision: $Id: Gatherer.toc 281 2006-09-13 03:31:17Z esamynn $
 ## OptionalDeps: myAddOns
 Gatherer.xml
 GathererUI.xml

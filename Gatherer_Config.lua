@@ -1,6 +1,5 @@
 --[[
 	Saved Variables Configuration and management code
-	Revision: $Id: Gatherer_Config.lua 281 2006-09-13 03:31:17Z esamynn $
 ]]
 
 Gatherer_Settings = {};

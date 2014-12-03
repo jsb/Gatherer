@@ -1,7 +1,6 @@
 --[[
 
 	Cartography data for Gatherer
-	Revision: $Id: GatherRegionData.lua 284 2006-09-14 22:56:01Z esamynn $
 
 ]]
 

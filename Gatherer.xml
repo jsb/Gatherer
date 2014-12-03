@@ -1,8 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	..\FrameXML\UI.xsd">
-	<!--
-		Revision: $Id: Gatherer.xml 284 2006-09-14 22:56:01Z esamynn $
-	-->
 	<Script file="localization.lua"/>
 	<Script file="UI_localization.lua"/>
 	<Script file="GatherRegionData.lua"/>

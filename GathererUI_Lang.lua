@@ -1,6 +1,5 @@
 --[[
 	Contains language specific functions succeptible to contains raw unicode characters
-	Revision: $Id: GathererUI_Lang.lua 284 2006-09-14 22:56:01Z esamynn $
 ]]--
 
 function GathererUI_FixItemName(itemName)
