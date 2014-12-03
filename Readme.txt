@@ -1,4 +1,5 @@
-This is Gatherer v2.2.3.1
+This is Gatherer 2.99.1
+
 http://gathereraddon.com
 
 ABOUT:

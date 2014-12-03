@@ -1,7 +1,7 @@
 -- Gatherer
 -- Written by Chandora
 
-GATHERER_VERSION="2.99.0.0284";
+GATHERER_VERSION="2.99.1";
 
 --
 -- Look, seriously a full half of this code is from MapNotes.
@@ -11,10 +11,6 @@ GATHERER_VERSION="2.99.0.0284";
 -- 
 -- Full credit to the MapNotes guys
 -- 
-
-if (GATHERER_VERSION == "2.99.0.0284") then
-	GATHERER_VERSION = "2.2.3.1";
-end
 
 -- Global variables
 GATHERNOTE_UPDATE_INTERVAL = 0.25;

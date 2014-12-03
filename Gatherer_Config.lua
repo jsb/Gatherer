@@ -21,7 +21,6 @@ Default_Settings = {
 	["showWorldMapFilters"] = 0,
 	["logInfo"] = "on",
 	["iconSet"] = "shaded",
-	--["Version"] = "2.2.3.1",
 	["ToggleWorldNotes"] = 0,
 	["IconSize"] = 12,
 	["useMinimapText"] = "on",
