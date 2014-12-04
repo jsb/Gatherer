@@ -1470,7 +1470,7 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 	end
 end
 
-function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
+function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, updateCount)
 	local hPos, gatherData;
 	if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
 	if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
@@ -1481,6 +1481,7 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	local first_hole = 0;
 	local count = 0;
 	local closest = 0;
+
 	for hPos, gatherData in GatherItems[gatherC][gatherZ][gather] do
 		count = count + 1;
 		if ( first_hole == 0 and hPos ~= count ) then
@@ -1504,10 +1505,10 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	elseif ( found == 0 and first_hole ~= 0 ) then -- not found but there's a hole, let's fill it
 		found = first_hole;
 	end
+	local newDiscovery = (found ~= 0);
 
 	local gatherCount = 1;
-	if ( gatherEventType and gatherEventType == 1 ) 
-	then
+	if (not updateCount) or (gatherEventType and gatherEventType == 1) then
 		if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
 			GatherItems[gatherC][gatherZ][gather][found] = { };
 			gatherCount = 0;
@@ -1531,6 +1532,8 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	GatherItems[gatherC][gatherZ][gather][found].gtype = gatherType;
 	GatherItems[gatherC][gatherZ][gather][found].count = gatherCount;
 	GatherItems[gatherC][gatherZ][gather][found].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+
+	return newDiscovery;
 end
 
 -- this function can be used as an interface by other addons to record things
@@ -1567,7 +1570,7 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	-- Broadcast to guild
 	Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
 
-	Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType);
+	Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, true);
 	Gatherer_OnUpdate(0,true);
 	GatherMain_Draw();
 end

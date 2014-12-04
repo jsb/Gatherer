@@ -65,7 +65,7 @@ function Gatherer_ReceiveBroadcast(message)
 
     if is_valid(sender) and is_valid(gatherType) and is_valid(gatherC) and is_valid(gatherZ) and is_valid(gatherX) and is_valid(gatherY) and is_valid(gatherIcon) and is_valid(gatherEventType) then
       if not sender == GetUnitName("player") then
-        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType);
+        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, false);
       end
     end
 end
