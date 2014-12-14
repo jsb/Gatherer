@@ -54,19 +54,13 @@ function Gatherer_DecodeGather(message)
 end
 
 function Gatherer_ReceiveBroadcast(message)
-    if Gatherer_Settings.debug then
-        Gatherer_ChatPrint("Gatherer Received: " .. message);
-    end
     local sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType = Gatherer_DecodeGather(message);
 
-    local function is_valid(s)
-      return not (s == nil or s == '')
-    end
-
-    if is_valid(sender) and is_valid(gatherType) and is_valid(gatherC) and is_valid(gatherZ) and is_valid(gatherX) and is_valid(gatherY) and is_valid(gatherIcon) and is_valid(gatherEventType) then
-      if not sender == GetUnitName("player") then
-        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, false);
+    if sender ~= GetUnitName("player") then
+      if Gatherer_Settings.debug then
+        Gatherer_ChatPrint("Gatherer Received: " .. message);
       end
+      Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, false);
     end
 end
 
