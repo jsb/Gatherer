@@ -1665,6 +1665,8 @@
 					<OnClick>
 						if (this:GetChecked()) then
 							Gatherer_Settings.ShowOnMouse = 1;
+							Gatherer_Settings.ShowOnClick = 0;
+							GathererUI_CheckShowOnClick:SetChecked(Gatherer_Settings.ShowOnClick);
 						else
 							Gatherer_Settings.ShowOnMouse = 0;
 							Gatherer_Settings.ShowOnClick = 1;
@@ -1697,8 +1699,12 @@
 					<OnClick>
 						if (this:GetChecked()) then
 							Gatherer_Settings.HideOnMouse = 1;
+							Gatherer_Settings.HideOnClick = 0;
+							GathererUI_CheckHideOnClick:SetChecked(Gatherer_Settings.HideOnClick);
 						else
 							Gatherer_Settings.HideOnMouse = 0;
+							Gatherer_Settings.HideOnClick = 1;
+							GathererUI_CheckHideOnClick:SetChecked(Gatherer_Settings.HideOnClick);
 						end
 					</OnClick>
 					<OnEnter>
@@ -1727,8 +1733,12 @@
 					<OnClick>
 						if (this:GetChecked()) then
 							Gatherer_Settings.HideOnClick = 1;
+							Gatherer_Settings.HideOnMouse = 0;
+							GathererUI_CheckHideOnMouse:SetChecked(Gatherer_Settings.HideOnMouse);
 						else
 							Gatherer_Settings.HideOnClick = 0;
+							Gatherer_Settings.HideOnMouse = 1;
+							GathererUI_CheckHideOnMouse:SetChecked(Gatherer_Settings.HideOnMouse);
 						end
 					</OnClick>
 					<OnEnter>
@@ -1788,6 +1798,8 @@
 					<OnClick>
 						if (this:GetChecked()) then
 							Gatherer_Settings.ShowOnClick = 1;
+							Gatherer_Settings.ShowOnMouse = 0;
+							GathererUI_CheckShowOnMouse:SetChecked(Gatherer_Settings.ShowOnMouse);
 						else
 							Gatherer_Settings.ShowOnClick = 0;
 							Gatherer_Settings.ShowOnMouse = 1;
@@ -1820,7 +1832,7 @@
 					</OnLoad>
 					<OnClick>
 						if (this:GetChecked()) then
-							Gatherer_Settings.HideIcon = tonumber("1");;
+							Gatherer_Settings.HideIcon = tonumber("1");
 							GathererUI_IconFrame:Hide();
 						else
 							Gatherer_Settings.HideIcon = tonumber("0");
