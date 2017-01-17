@@ -30,7 +30,7 @@ Gatherer_UpdateWorldMap = -1;
 Gatherer_InWorld = false;
 GatherItems = { };
 GatherSkills = { };
-GatherZoneData = { };
+GatherZoneData = { }; -- Dict[ZoneName, Tuple[Continent, Zone]]
 GatherMainMapItem = { };
 -- UI variables
 Gatherer_WorldMapDetailFrameWidth = 0;
@@ -1474,79 +1474,93 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 	end
 end
 
-function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, updateCount)
-	-- comparing to the latest official version (2.99.0.0284)
-	-- this function was brought out into the global space and extended with the updateCount argument.
-	-- `updateCount` is a strange name, since `true` value is passed in the single call place.
-	-- Also it has started to return whether newDiscovery was found.
-	local hPos, gatherData;
-	if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
-	if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
-	if (not GatherItems[gatherC][gatherZ][gather]) then GatherItems[gatherC][gatherZ][gather] = { }; end
 
-	local found = 0;
+local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
+	-- type: (GatherList, float, float, float) -> Tuple(int, bool, float, float)
+	-- gatherList - list of the same gather
+	-- maxCheckDist - two nodes closer than this distance are considered the same node
+	-- returns: index to insert new gather, whether new node was found, corrected gathering coordinates
+	local resultIndex = 0;
 	local lastGather = 0;
-	local first_hole = 0;
+	local firstNumerationGap = 0;
 	local count = 0;
 	local closest = 0;
+	local newNode = true;
 
-	for hPos, gatherData in GatherItems[gatherC][gatherZ][gather] do
+	for gatherIndex, gatherData in gatherList do
 		count = count + 1;
-		if ( first_hole == 0 and hPos ~= count ) then
-			first_hole = count;
+		if ( firstNumerationGap == 0 and gatherIndex ~= count ) then
+			firstNumerationGap = count;
 		end
 		local dist, deltaX, deltaY = Gatherer_Distance(gatherX,gatherY, gatherData.x,gatherData.y);
-		local maxCheckDist = 0.5;
-		if ( gatherEventType and gatherEventType == 2 ) then maxCheckDist = 1; end
 		if ((dist < maxCheckDist) and ((closest == 0) or (closest > dist))) then -- same gather
 			gatherX = (gatherX + gatherData.x) / 2;
 			gatherY = (gatherY + gatherData.y) / 2;
 			closest = dist;
-			found = hPos;
+			resultIndex = gatherIndex;
+			newNode = false;
 		end
-		if (hPos > lastGather) then
-			lastGather = hPos;
+		if (gatherIndex > lastGather) then
+			lastGather = gatherIndex;
 		end
 	end
-	if (found == 0 and first_hole == 0) then -- need to create a new one (at hPos+1)
-		found = lastGather+1;
-	elseif ( found == 0 and first_hole ~= 0 ) then -- not found but there's a hole, let's fill it
-		found = first_hole;
-	end
-	-- Strange logic too: here found will almost always be non-zero.
-	-- The only chance is when lastGather == -1.
-	-- In all the other cases newDiscovery will become `true`
-	local newDiscovery = (found ~= 0);
 
-	local gatherCount = 1;
-	-- provided updateCount is always true, we can remove first part of the condition,
-	-- since false or x == x
+	local thereIsNumerationGap = firstNumerationGap ~= 0;
+	if (newNode) then
+		-- need to create a new one (at gatherIndex+1)
+		resultIndex = lastGather+1;
+		-- no duplicate but there's a hole, let's fill it
+		if thereIsNumerationGap then
+			resultIndex = firstNumerationGap;
+		end
+	end
+	return resultIndex, newNode, gatherX, gatherY
+end
+
+
+function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, updateCount)
+	-- type: (Text, EGatherType, Continent, Zone, float, float, Text, EGatherEventType, bool) -> bool
+	-- comparing to the latest official version (2.99.0.0284)
+	-- this function was brought out into the global space and extended with the updateCount argument.
+	-- The latter denotes whether the gather count should be incremented.
+	-- Also it has started to return whether newNode was found.
+	if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
+	if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
+	if (not GatherItems[gatherC][gatherZ][gather]) then GatherItems[gatherC][gatherZ][gather] = { }; end
+
+	local maxCheckDist = 0.5;
+	if ( gatherEventType and gatherEventType == 2 ) then maxCheckDist = 1; end
+
+	local indexToWrite, newNode;
+	indexToWrite, newNode, gatherX, gatherY = gatherIndexToWrite(
+		GatherItems[gatherC][gatherZ][gather], maxCheckDist, gatherX, gatherY
+	);
+
+	local countIncrement = 1;
+	-- when gathered without required skill or received via broacast
 	if (not updateCount) or (gatherEventType and gatherEventType == 1) then
-		if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
-			GatherItems[gatherC][gatherZ][gather][found] = { };
-			gatherCount = 0;
-		else
-			gatherCount = GatherItems[gatherC][gatherZ][gather][found].count;
-		end
+		countIncrement = 0
+	end
+
+	local newCount;
+	if (GatherItems[gatherC][gatherZ][gather][indexToWrite] == nil) then
+		GatherItems[gatherC][gatherZ][gather][indexToWrite] = { };
+		newCount = countIncrement;
 	else
-		if (GatherItems[gatherC][gatherZ][gather][found] == nil) then
-			GatherItems[gatherC][gatherZ][gather][found] = { };
-		else
-			gatherCount = GatherItems[gatherC][gatherZ][gather][found].count + 1;
-		end
+		newCount = GatherItems[gatherC][gatherZ][gather][indexToWrite].count + countIncrement;
 	end
 
 	-- Round off those coordinates
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
-	GatherItems[gatherC][gatherZ][gather][found].x = gatherX;
-	GatherItems[gatherC][gatherZ][gather][found].y = gatherY;
-	GatherItems[gatherC][gatherZ][gather][found].gtype = gatherType;
-	GatherItems[gatherC][gatherZ][gather][found].count = gatherCount;
-	GatherItems[gatherC][gatherZ][gather][found].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+	GatherItems[gatherC][gatherZ][gather][indexToWrite].x = gatherX;
+	GatherItems[gatherC][gatherZ][gather][indexToWrite].y = gatherY;
+	GatherItems[gatherC][gatherZ][gather][indexToWrite].gtype = gatherType;
+	GatherItems[gatherC][gatherZ][gather][indexToWrite].count = newCount;
+	GatherItems[gatherC][gatherZ][gather][indexToWrite].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
 
-	return newDiscovery;
+	return newNode;
 end
 
 -- this function can be used as an interface by other addons to record things
@@ -1558,6 +1572,7 @@ end
 --   gatherIcon (string): matching icon from Gatherer icon table (match gather name)
 --   gatherEventType (number): 0 normal gather, 1 gather without required skill, 2 fishing node
 function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
+	-- type: (Text, EGatherType, Text, EGatherEventType) -> nil
 
 	if ( Gatherer_Settings.filterRecording[gatherType] and not Gatherer_Settings.interested[gatherType][gatherIcon] ) then
 		return;
@@ -1567,8 +1582,8 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 		--Gatherer_Print("Gatherer: Cannot record item position as client is reporting position 0,0");
 		return;
 	end
-	local gatherC, gatherZ = Gatherer_GetCurrentZone();
-	if (gatherC == 0 or gatherZ == 0) then
+	local gatherContinent, gatherZone = Gatherer_GetCurrentZone();
+	if (gatherContinent == 0 or gatherZone == 0) then
 		--Gatherer_Print("Gatherer: Cannot record item, invalid continent/zone.");
 		return;
 	end
@@ -1581,9 +1596,9 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	end
 
 	-- Broadcast to guild
-	Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
+	Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, gatherIcon, gatherEventType)
 
-	Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, true);
+	Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, gatherIcon, gatherEventType, true);
 	Gatherer_OnUpdate(0,true);
 	GatherMain_Draw();
 end
@@ -1696,7 +1711,7 @@ end
 
 function Gatherer_LoadZoneData()
 	local continentData = {GetMapContinents()};
-	for continentIndex, continentName in continentData do
+	for continentIndex, _ in continentData do
 		local zoneData = {GetMapZones(continentIndex)};
 		for zoneIndex, zoneName in zoneData do
 			GatherZoneData[zoneName] = { [1] = continentIndex, [2] = zoneIndex };
@@ -1705,6 +1720,7 @@ function Gatherer_LoadZoneData()
 end
 
 function Gatherer_GetCurrentZone()
+	-- type: () -> Tuple[Continent, Zone]
 	local zoneData = GatherZoneData[GetRealZoneText()];
 	if ( zoneData ) then
 		return zoneData[1], zoneData[2];
