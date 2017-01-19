@@ -671,9 +671,37 @@ function Gatherer_GetSkills()
 	end
 end
 
+
+local function random_choice(t)
+    local choiceI = nil;
+	local choiceO = nil;
+    local n = 0;
+    for i, o in pairs(t) do
+        n = n + 1
+        if math.random() < (1/n) then
+            choiceI, choiceO = i, o
+        end
+    end
+    return choiceI, choiceO
+end
+
+
+local function selectRandomGather()
+	-- type: () -> Tuple[gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType]
+	-- returns the arguments set for the Gatherer_BroadcastGather function
+	local randomContinent, continentData = random_choice(GatherItems)
+	local randomZone, zoneData = random_choice(continentData)
+	local randomGather, gatherNodes = random_choice(zoneData)
+	local _, randomNode = random_choice(gatherNodes)
+	return randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y, 'icon', 1
+end
 -- *************************************************************************
 -- Update related functions
 
+local Gatherer_UpdateTicker = 0.0;
+local Gatherer_AnnouncePeriod = 10;
+local Gatherer_CycleCount = 0;
+local Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod;
 function Gatherer_TimeCheck(timeDelta)
 	if (not GatherNotes) then
 		GatherNotes = { timeDiff=0, checkDiff=0 };
@@ -684,6 +712,27 @@ function Gatherer_TimeCheck(timeDelta)
 			Gatherer_OnUpdate(0,true);
 		end
 	end
+	Gatherer_UpdateTicker = Gatherer_UpdateTicker + arg1;
+	if( Gatherer_UpdateTicker < 1 ) then
+		return
+	end
+	-- reset seconds counter
+	Gatherer_UpdateTicker = 0.0;
+	-- the code below will run not more frequently
+	-- than once a second
+	Gatherer_SecondsToAnnounce = Gatherer_SecondsToAnnounce - 1
+--	Gatherer_Print('Every second '..Gatherer_SecondsToAnnounce..' seconds.')
+	if Gatherer_SecondsToAnnounce > 0 then
+		return
+	end
+	-- the code below will run not more frequently
+	-- than once Gatherer_AnnouncePeriod seconds
+	Gatherer_CycleCount = Gatherer_CycleCount + 1
+	Gatherer_Print('Cycle #'..Gatherer_CycleCount)
+	Gatherer_Print('I`m printing that string once per '..Gatherer_AnnouncePeriod..' seconds.')
+--	local gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType = selectRandomGather()
+	Gatherer_Print(table.concat({selectRandomGather()}, ', '))
+	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
 function Gatherer_OnUpdate(timeDelta, force)
@@ -1633,6 +1682,7 @@ end
 -- String display related functions
 
 function Gatherer_ChatPrint(str)
+	-- usually DEFAULT_CHAT_FRAME is the default "General" chat window
 	if ( DEFAULT_CHAT_FRAME ) then
 		DEFAULT_CHAT_FRAME:AddMessage(str, 1.0, 0.5, 0.25);
 	end
@@ -1646,6 +1696,7 @@ function Gatherer_Print(str, add)
 	if (add) then
 		str = str..": "..add;
 	end
+	-- adds a message into the combat log
 	if(ChatFrame2) then
 		ChatFrame2:AddMessage(str, 1.0, 1.0, 0.0);
 	end
