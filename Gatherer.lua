@@ -687,14 +687,26 @@ end
 
 
 local function selectRandomGather()
-	-- type: () -> Tuple[gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType]
+	-- type: () -> Tuple[GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType]
 	-- returns the arguments set for the Gatherer_BroadcastGather function
-	local randomContinent, continentData = random_choice(GatherItems)
-	local randomZone, zoneData = random_choice(continentData)
-	local randomGather, gatherNodes = random_choice(zoneData)
-	local _, randomNode = random_choice(gatherNodes)
-	return randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y, 'icon', 1
+	local randomContinent, continentData = random_choice(GatherItems);
+	local randomZone, zoneData = random_choice(continentData);
+	local randomGather, gatherNodes = random_choice(zoneData);
+	local _, randomNode = random_choice(gatherNodes);
+
+	local eventType = 1; -- EGatherEventType.no_skill
+	-- values don't matter, I just hate lua
+	local FISHING_GATHERS = {['floating wreckage']=0, ['school']=''};
+	if FISHING_GATHERS[randomGather] then
+		eventType = 2; -- EGatherEventType.fishing
+	end
+
+	return
+		randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y,
+		Gatherer_GetDB_IconIndex(randomNode.icon, randomNode.gtype), eventType
 end
+
+
 -- *************************************************************************
 -- Update related functions
 
@@ -728,10 +740,13 @@ function Gatherer_TimeCheck(timeDelta)
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
 	Gatherer_CycleCount = Gatherer_CycleCount + 1
-	Gatherer_Print('Cycle #'..Gatherer_CycleCount)
-	Gatherer_Print('I`m printing that string once per '..Gatherer_AnnouncePeriod..' seconds.')
---	local gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType = selectRandomGather()
-	Gatherer_Print(table.concat({selectRandomGather()}, ', '))
+	local args = {selectRandomGather()};
+	if Gatherer_Settings.debug then
+		Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
+		Gatherer_ChatPrint('Gatherer: Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.');
+		Gatherer_ChatPrint('Gatherer: args to send: '..table.concat(args, ', '));
+	end
+	Gatherer_BroadcastGather(unpack(args))
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
@@ -861,7 +876,7 @@ function Gatherer_OnUpdate(timeDelta, force)
 					local textureIcon = closestGather.item.icon;
 
 					if ( type(textureType) == "number" ) then
-						textureType = Gather_DB_TypeIndex[textureType];
+						textureType = Gatherer_EGatherType[textureType];
 					end
 
 					if ( type(textureIcon) == "number" ) then
@@ -1086,11 +1101,11 @@ function GatherMain_Draw()
 							end
 
 							if ( type(gatherType) == "number" ) then
-								convertedGatherType = Gather_DB_TypeIndex[gatherType];
+								convertedGatherType = Gatherer_EGatherType[gatherType];
 								numGatherType = gatherType
 							else
 								convertedGatherType = gatherType;
-								numGatherType = Gather_DB_TypeIndex[gatherType];
+								numGatherType = Gatherer_EGatherType[gatherType];
 							end
 
 							if (not Gather_IconSet["iconic"][convertedGatherType]) then
@@ -1568,7 +1583,7 @@ end
 
 
 function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, updateCount)
-	-- type: (Text, EGatherType, Continent, Zone, float, float, Text, EGatherEventType, bool) -> bool
+	-- type: (GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType, bool) -> bool
 	-- comparing to the latest official version (2.99.0.0284)
 	-- this function was brought out into the global space and extended with the updateCount argument.
 	-- The latter denotes whether the gather count should be incremented.
@@ -1671,7 +1686,7 @@ function Gatherer_Show()
 		for gatherZone, zoneData in contData do
 			for gatherName, nameData in zoneData do
 				for gatherPos, gatherItem in nameData do
-					Gatherer_Print(Gather_DB_TypeIndex[gatherItem.gtype].." "..gatherName.." was found in zone "..gatherCont..":"..gatherZone.." at "..gatherItem.x..","..gatherItem.y.."  ("..gatherItem.count.." times)");
+					Gatherer_Print(Gatherer_EGatherType[gatherItem.gtype].." "..gatherName.." was found in zone "..gatherCont..":"..gatherZone.." at "..gatherItem.x..","..gatherItem.y.."  ("..gatherItem.count.." times)");
 				end
 			end
 		end
@@ -2071,7 +2086,7 @@ function Gatherer_WMDropDownGType_Initialize()
 		iconGtype = GatherMainMapItem.newType;
 	end
 
-	for index, value in Gather_DB_TypeIndex do
+	for index, value in Gatherer_EGatherType do
 		if ( type(value) == "number" and value ~= 3 )
 		then
 			info.text = index;
@@ -2088,7 +2103,7 @@ function Gatherer_WMDropDownGType_Initialize()
 
 	if ( type(GatherMainMapItem.gatherType) == "number" )
 	then
-		UIDropDownMenu_SetText(Gather_DB_TypeIndex[GatherMainMapItem.gatherType], Gatherer_WMDropDownGType);
+		UIDropDownMenu_SetText(Gatherer_EGatherType[GatherMainMapItem.gatherType], Gatherer_WMDropDownGType);
 	else
 		UIDropDownMenu_SetText(GatherMainMapItem.gatherType, Gatherer_WMDropDownGType);
 	end
@@ -2096,7 +2111,7 @@ end
 
 function Gatherer_WMDropDownGType_OnClick()
 	UIDropDownMenu_SetSelectedID(Gatherer_WMDropDownGType, this:GetID());
-	GatherMainMapItem.newType = Gather_DB_TypeIndex[UIDropDownMenu_GetText(Gatherer_WMDropDownGType)];
+	GatherMainMapItem.newType = Gatherer_EGatherType[UIDropDownMenu_GetText(Gatherer_WMDropDownGType)];
 
 	UIDropDownMenu_ClearAll(Gatherer_WMDropDownIcons);
 	UIDropDownMenu_Initialize(Gatherer_WMDropDownIcons, Gatherer_WMDropDownIcons_Initialize);
