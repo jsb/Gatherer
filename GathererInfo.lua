@@ -226,7 +226,7 @@ function GathererInfo_Update()
 					then
 						gtype = GatherItems[gi_cont][gi_zone][node_idx][index].gtype;
 					else
-						gtype = Gather_DB_TypeIndex[GatherItems[gi_cont][gi_zone][node_idx][index].gtype]
+						gtype = Gatherer_EGatherType[GatherItems[gi_cont][gi_zone][node_idx][index].gtype]
 					end
 
 					typeNodeCount[gtype] = typeNodeCount[gtype] + GatherItems[gi_cont][gi_zone][node_idx][index].count;
@@ -243,7 +243,7 @@ function GathererInfo_Update()
 					then
 						gtype = GatherItems[gi_cont][gi_zone][node_idx][index].gtype;
 					else
-						gtype = Gather_DB_TypeIndex[GatherItems[gi_cont][gi_zone][node_idx][index].gtype]
+						gtype = Gatherer_EGatherType[GatherItems[gi_cont][gi_zone][node_idx][index].gtype]
 					end
 
 					nodeCount = typeNodeCount[gtype];
@@ -261,7 +261,7 @@ function GathererInfo_Update()
 						GITT[i].name     = node_idx;
 
 						if ( type(GatherItems[gi_cont][gi_zone][node_idx][index].gtype) == "number" ) then
-							GITT[i].gatherType = Gather_DB_TypeIndex[GatherItems[gi_cont][gi_zone][node_idx][index].gtype];
+							GITT[i].gatherType = Gatherer_EGatherType[GatherItems[gi_cont][gi_zone][node_idx][index].gtype];
 						else
 							GITT[i].gatherType = GatherItems[gi_cont][gi_zone][node_idx][index].gtype;
 						end
@@ -448,7 +448,7 @@ function GathererInfo_GatherTypeDropDown_Initialize()
 	local index;
 	local info = {};
 
-	for index in Gather_DB_TypeIndex do
+	for index in Gatherer_EGatherType do
 		if ( index ~= "Default" and type(index) == "string" ) then
 			info.text = index;
 			info.checked = nil;
@@ -481,7 +481,7 @@ function GathererInfo_GatherItemDropDown_Initialize()
 	local selectedGatherType
 
 	if ( selectedGatherTypeText ) then
-		selectedGatherType = Gather_DB_TypeIndex[selectedGatherTypeText];
+		selectedGatherType = Gatherer_EGatherType[selectedGatherTypeText];
 
 		for index in Gather_DB_IconIndex[selectedGatherType] do
 			if (index ~= "default" ) then
@@ -516,7 +516,7 @@ function GathererInfo_GatherItem_OnClick()
 							-- check gather type
 							locGtype = GatherItems[gi_cont][gi_zone][gi_node][gi_index].gtype;
 							if ( locGtype and type(locGtype) == "string" ) then
-								locGtype = Gather_DB_TypeIndex[locGtype];
+								locGtype = Gatherer_EGatherType[locGtype];
 							end
 							locIcon = GatherItems[gi_cont][gi_zone][gi_node][gi_index].icon;
 							if ( (type(locIcon) == "string" and locIcon == search_item) or
@@ -581,7 +581,7 @@ function GathererInfo_SearchUpdate()
 										-- check gather type
 										locGtype = GatherItems[gi_cont][gi_zone][node_idx][index].gtype;
 										if ( type(locGtype) == "string" ) then
-											locGtype = Gather_DB_TypeIndex[locGtype];
+											locGtype = Gatherer_EGatherType[locGtype];
 										end
 										locIcon = GatherItems[gi_cont][gi_zone][node_idx][index].icon;
 										if ( (type(locIcon) == "string" and locIcon == search_item) or

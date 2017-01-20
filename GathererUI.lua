@@ -654,7 +654,7 @@ function GathererUI_ZoneRematch(sourceZoneMapping, destZoneMapping)
 						if ( type(myGather.gtype) == "number" ) then
 							myGatherType = myGather.gtype;
 						else
-							myGatherType = Gather_DB_TypeIndex[myGather.gtype];
+							myGatherType = Gatherer_EGatherType[myGather.gtype];
 						end
 						if ( type(myGather.icon) == "number" ) then
 							myIcon= myGather.icon;

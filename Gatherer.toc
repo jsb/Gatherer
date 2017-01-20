@@ -10,6 +10,7 @@
 ## SavedVariables: GatherItems, Gatherer_SavedSettings_AccountWide
 ## SavedVariablesPerCharacter: Gatherer_SavedSettings_PerCharacter
 ## OptionalDeps: myAddOns
+constants.lua
 Gatherer.xml
 GathererUI.xml
 GathererInfo.xml

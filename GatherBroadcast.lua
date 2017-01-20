@@ -8,6 +8,7 @@ function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX,
         local prettyNodeName = gather;
         local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
         Gatherer_ChatPrint("Gatherer: Broadcasting new " .. prettyNodeName .. " node found in " .. prettyZoneName .. ".");
+        Gatherer_ChatPrint("Gatherer: gatherType: " .. gatherType .. ", gatherEventType: " .. gatherEventType .. ".");
     end
 
     Gatherer_SendRawMessage(message);
