@@ -69,6 +69,7 @@ function Gatherer_ReceiveBroadcast(message)
             local prettyNodeName = gather;
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
             Gatherer_ChatPrint("Gatherer: " .. sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".");
+			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', gatherIcon: '..gatherIcon..', gatherEventType: '..gatherEventType)
         end
         Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, false);
     end
