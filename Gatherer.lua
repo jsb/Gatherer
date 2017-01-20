@@ -1539,7 +1539,7 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 end
 
 
-local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
+local function insertionGatherIndex(gatherList, maxCheckDist, gatherX, gatherY)
 	-- type: (GatherList, float, float, float) -> Tuple(int, bool, float, float)
 	-- gatherList - list of the same gather
 	-- maxCheckDist - two nodes closer than this distance are considered the same node
@@ -1549,7 +1549,7 @@ local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
 	local firstNumerationGap = 0;
 	local count = 0;
 	local closest = 0;
-	local newNode = true;
+	local newNodeFound = true;
 
 	for gatherIndex, gatherData in gatherList do
 		count = count + 1;
@@ -1562,7 +1562,7 @@ local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
 			gatherY = (gatherY + gatherData.y) / 2;
 			closest = dist;
 			resultIndex = gatherIndex;
-			newNode = false;
+			newNodeFound = false;
 		end
 		if (gatherIndex > lastGather) then
 			lastGather = gatherIndex;
@@ -1570,7 +1570,7 @@ local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
 	end
 
 	local thereIsNumerationGap = firstNumerationGap ~= 0;
-	if (newNode) then
+	if (newNodeFound) then
 		-- need to create a new one (at gatherIndex+1)
 		resultIndex = lastGather+1;
 		-- no duplicate but there's a hole, let's fill it
@@ -1578,7 +1578,7 @@ local function gatherIndexToWrite(gatherList, maxCheckDist, gatherX, gatherY)
 			resultIndex = firstNumerationGap;
 		end
 	end
-	return resultIndex, newNode, gatherX, gatherY
+	return resultIndex, newNodeFound, gatherX, gatherY
 end
 
 
@@ -1587,7 +1587,7 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	-- comparing to the latest official version (2.99.0.0284)
 	-- this function was brought out into the global space and extended with the updateCount argument.
 	-- The latter denotes whether the gather count should be incremented.
-	-- Also it has started to return whether newNode was found.
+	-- Also it has started to return whether new node was found.
 	if (not GatherItems[gatherC]) then GatherItems[gatherC] = { }; end
 	if (not GatherItems[gatherC][gatherZ]) then GatherItems[gatherC][gatherZ] = { }; end
 	if (not GatherItems[gatherC][gatherZ][gather]) then GatherItems[gatherC][gatherZ][gather] = { }; end
@@ -1595,8 +1595,8 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	local maxCheckDist = 0.5;
 	if ( gatherEventType and gatherEventType == 2 ) then maxCheckDist = 1; end
 
-	local indexToWrite, newNode;
-	indexToWrite, newNode, gatherX, gatherY = gatherIndexToWrite(
+	local insertionIndex, newNodeFound;
+	insertionIndex, newNodeFound, gatherX, gatherY = insertionGatherIndex(
 		GatherItems[gatherC][gatherZ][gather], maxCheckDist, gatherX, gatherY
 	);
 
@@ -1607,24 +1607,24 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	end
 
 	local newCount;
-	if (GatherItems[gatherC][gatherZ][gather][indexToWrite] == nil) then
-		GatherItems[gatherC][gatherZ][gather][indexToWrite] = { };
+	if (GatherItems[gatherC][gatherZ][gather][insertionIndex] == nil) then
+		GatherItems[gatherC][gatherZ][gather][insertionIndex] = { };
 		newCount = countIncrement;
 	else
-		newCount = GatherItems[gatherC][gatherZ][gather][indexToWrite].count + countIncrement;
+		newCount = GatherItems[gatherC][gatherZ][gather][insertionIndex].count + countIncrement;
 	end
 
 	-- Round off those coordinates
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
-	GatherItems[gatherC][gatherZ][gather][indexToWrite].x = gatherX;
-	GatherItems[gatherC][gatherZ][gather][indexToWrite].y = gatherY;
-	GatherItems[gatherC][gatherZ][gather][indexToWrite].gtype = gatherType;
-	GatherItems[gatherC][gatherZ][gather][indexToWrite].count = newCount;
-	GatherItems[gatherC][gatherZ][gather][indexToWrite].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].x = gatherX;
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].y = gatherY;
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].count = newCount;
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
 
-	return newNode;
+	return newNodeFound;
 end
 
 -- this function can be used as an interface by other addons to record things
