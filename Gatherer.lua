@@ -491,6 +491,7 @@ function Gatherer_OnEvent(event)
 		if (arg1 and string.lower(arg1) == "gatherer") then
 			Gatherer_Configuration.Load();
 			GATHERER_LOADED = true;
+			Gatherer_sanitizeDatabase(GatherItems)
 			Gatherer_OnUpdate(0, true);
 
 			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
@@ -692,7 +693,13 @@ local function selectRandomGather()
 	local randomContinent, continentData = random_choice(GatherItems);
 	local randomZone, zoneData = random_choice(continentData);
 	local randomGather, gatherNodes = random_choice(zoneData);
-	local _, randomNode = random_choice(gatherNodes);
+	local nodeIndex, randomNode = random_choice(gatherNodes);
+	Gatherer_ChatNotify('randomly selected: '..table.concat(
+		{randomContinent, randomZone, randomGather, nodeIndex}, ', '
+	), Gatherer_ENotificationType.debug);
+	if not nodeIndex then
+		return nil
+	end
 
 	local eventType = 1; -- EGatherEventType.no_skill
 	-- values don't matter, I just hate lua
@@ -739,8 +746,12 @@ function Gatherer_TimeCheck(timeDelta)
 	end
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
-	Gatherer_CycleCount = Gatherer_CycleCount + 1
 	local args = {selectRandomGather()};
+	-- if failed to get a random node skip cycle
+	if not args[1] then
+		return
+	end
+	Gatherer_CycleCount = Gatherer_CycleCount + 1
 	if Gatherer_Settings.debug then
 		Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
 		Gatherer_ChatPrint('Gatherer: Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.');
@@ -1618,6 +1629,7 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
+	assert(type(gatherIcon) == 'string')
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].x = gatherX;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].y = gatherY;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
