@@ -11,6 +11,9 @@
 ## SavedVariablesPerCharacter: Gatherer_SavedSettings_PerCharacter
 ## OptionalDeps: myAddOns
 constants.lua
+string.lua
+notifications.lua
+database.lua
 Gatherer.xml
 GathererUI.xml
 GathererInfo.xml
