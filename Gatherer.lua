@@ -710,7 +710,7 @@ local function selectRandomGather()
 
 	return
 		randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y,
-		Gatherer_GetDB_IconIndex(randomNode.icon, randomNode.gtype), eventType
+		randomNode.icon, eventType
 end
 
 
@@ -1593,8 +1593,8 @@ local function insertionGatherIndex(gatherList, maxCheckDist, gatherX, gatherY)
 end
 
 
-function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, updateCount)
-	-- type: (GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType, bool) -> bool
+function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, updateCount)
+	-- type: (GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconIndex, EGatherEventType, bool) -> bool
 	-- comparing to the latest official version (2.99.0.0284)
 	-- this function was brought out into the global space and extended with the updateCount argument.
 	-- The latter denotes whether the gather count should be incremented.
@@ -1629,12 +1629,12 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
-	assert(type(gatherIcon) == 'string')
+	assert(type(iconIndex) == 'number')
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].x = gatherX;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].y = gatherY;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].count = newCount;
-	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = iconIndex
 
 	return newNodeFound;
 end
@@ -1648,8 +1648,8 @@ end
 --   gatherIcon (string): matching icon from Gatherer icon table (match gather name)
 --   gatherEventType (number): 0 normal gather, 1 gather without required skill, 2 fishing node
 function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
-	-- type: (Text, EGatherType, Text, EGatherEventType) -> nil
-
+	-- type: (GatherName, EGatherType, IconName, EGatherEventType) -> nil
+	assert(type(gatherIcon) == 'string')
 	if ( Gatherer_Settings.filterRecording[gatherType] and not Gatherer_Settings.interested[gatherType][gatherIcon] ) then
 		return;
 	end
@@ -1671,10 +1671,11 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 		GatherItems = { };
 	end
 
+	local iconIndex = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
 	-- Broadcast to guild
-	Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, gatherIcon, gatherEventType)
+	Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
 
-	Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, gatherIcon, gatherEventType, true);
+	Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType, true);
 	Gatherer_OnUpdate(0,true);
 	GatherMain_Draw();
 end

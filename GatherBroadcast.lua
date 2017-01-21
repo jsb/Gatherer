@@ -1,8 +1,9 @@
-GATHERER_ADDON_MESSAGE_PREFIX = "GATHERER";
 GATHERER_TOKEN_SEPARATOR = ";";
+GATHERER_ADDON_MESSAGE_PREFIX = "gatherer_p2p";
 
-function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
-    local message = Gatherer_EncodeGather(GetUnitName("player"), gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType);
+function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType)
+    assert(type(iconIndex) == 'number')
+    local message = Gatherer_EncodeGather(GetUnitName("player"), gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType);
 
     if Gatherer_Settings.debug then
         local prettyNodeName = gather;
@@ -14,10 +15,45 @@ function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX,
     Gatherer_SendRawMessage(message);
 end
 
-function Gatherer_AddonMessageEvent(prefix, message, type)
-    if prefix == GATHERER_ADDON_MESSAGE_PREFIX then
-        Gatherer_ReceiveBroadcast(message);
+
+VERSION_REG_EXP = '(%d+)\.(%d+)\.(%d+)';
+
+
+local function extractVersion(str)
+    -- type(Text) -> Tuple[int, int, int]
+    local major, minor, fix = str:match(VERSION_REG_EXP)
+    return {tonumber(major), tonumber(minor), tonumber(fix)}
+end
+
+
+local function validPrefix(prefix)
+    -- type(Text) -> bool
+    -- Return true if prefix has correct format and acceptable version.
+    -- Message format is considered broken if *minor version* changes.
+    -- Thus fix builds by sermver will be compatible with each other.
+
+    -- check overall prefix format
+    local prefixPos = strfind(
+        prefix, '^'..GATHERER_ADDON_MESSAGE_PREFIX..GATHERER_TOKEN_SEPARATOR..VERSION_REG_EXP..'$'
+    );
+    if (not prefixPos) then
+        return
+	end
+	-- check version components
+    local prefixVersion = extractVersion(prefix)
+    local currentVersion = extractVersion(GATHERER_VERSION)
+    if prefixVersion[1] ~= currentVersion[1] or prefixVersion[2] ~= currentVersion[2] then
+        return
     end
+	return true
+end
+
+
+function Gatherer_AddonMessageEvent(prefix, message, type)
+	if not validPrefix(prefix) then
+        return
+	end
+	Gatherer_ReceiveBroadcast(message);
 end
 
 function Gatherer_EncodeGather(sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType)
@@ -47,7 +83,7 @@ function Gatherer_DecodeGather(message)
     local gatherZ, rest = eatToken(rest);
     local gatherX, rest = eatToken(rest);
     local gatherY, rest = eatToken(rest);
-    local gatherIcon, rest = eatToken(rest);
+    local iconIndex, rest = eatToken(rest);
     local gatherEventType, rest = eatToken(rest);
 
     -- correct types
@@ -56,25 +92,29 @@ function Gatherer_DecodeGather(message)
     gatherZ = tonumber(gatherZ);
     gatherX = tonumber(gatherX);
     gatherY = tonumber(gatherY);
+    iconIndex = tonumber(iconIndex);
     gatherEventType = tonumber(gatherEventType);
 
-    return sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType;
+    return sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType;
 end
 
 function Gatherer_ReceiveBroadcast(message)
-    local sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType = Gatherer_DecodeGather(message);
-
+    local sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType = Gatherer_DecodeGather(message);
+    assert(type(iconIndex) == 'number')
     if sender ~= GetUnitName("player") then
         if Gatherer_Settings.debug then
             local prettyNodeName = gather;
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
             Gatherer_ChatPrint("Gatherer: " .. sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".");
-			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', gatherIcon: '..gatherIcon..', gatherEventType: '..gatherEventType)
+			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType)
         end
-        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, gatherIcon, gatherEventType, false);
+        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
     end
 end
 
 function Gatherer_SendRawMessage(message)
-    SendAddonMessage(GATHERER_ADDON_MESSAGE_PREFIX, message, "GUILD");
+    SendAddonMessage(
+        GATHERER_ADDON_MESSAGE_PREFIX..GATHERER_TOKEN_SEPARATOR..GATHERER_VERSION,
+        message, "GUILD"
+    );
 end
