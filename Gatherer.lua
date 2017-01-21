@@ -1,7 +1,7 @@
 -- Gatherer
 -- Written by Chandora
 
-GATHERER_VERSION="2.99.2";
+GATHERER_VERSION="1.0.0";
 
 --
 -- Look, seriously a full half of this code is from MapNotes.
@@ -493,7 +493,7 @@ function Gatherer_OnEvent(event)
 			GATHERER_LOADED = true;
 			Gatherer_OnUpdate(0, true);
 
-			Gatherer_Print("Gatherer v"..GATHERER_VERSION.." -- Loaded!");
+			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
 
 			if (Gatherer_Settings.useMainmap == true) then
 				Gatherer_WorldMapDisplay:SetText("Hide Items");
