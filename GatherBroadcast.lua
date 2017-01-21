@@ -108,7 +108,14 @@ function Gatherer_ReceiveBroadcast(message)
             Gatherer_ChatPrint("Gatherer: " .. sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".");
 			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType)
         end
-        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+        local newNodeFound = Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+        if Gatherer_Settings.debug then
+            if newNodeFound then
+				Gatherer_ChatNotify('It was a new node!', Gatherer_ENotificationType.info)
+            else
+                Gatherer_ChatNotify('It was a duplicate.', Gatherer_ENotificationType.warning)
+            end
+        end
     end
 end
 
