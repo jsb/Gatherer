@@ -21,13 +21,13 @@ VERSION_REG_EXP = '(%d+)\.(%d+)\.(%d+)';
 
 local function extractVersion(str)
     -- type(Text) -> Tuple[int, int, int]
-    local major, minor, fix = str:match(VERSION_REG_EXP)
+    local major, minor, fix = Gatherer_split(str, '.')
     return {tonumber(major), tonumber(minor), tonumber(fix)}
 end
 
 
 local function validPrefix(prefix)
-    -- type(Text) -> bool
+    -- type: (Text) -> bool
     -- Return true if prefix has correct format and acceptable version.
     -- Message format is considered broken if *minor version* changes.
     -- Thus fix builds by sermver will be compatible with each other.
