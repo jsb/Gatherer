@@ -164,6 +164,8 @@ function Gatherer_Command(command)
 		Gatherer_ChatPrint("  |cffffffff/gather search|r - show/hide search dialog.");
 		Gatherer_ChatPrint("  |cffffffff/gather loginfo (on|off)|r - show/hide logon information.");
 		Gatherer_ChatPrint("  |cffffffff/gather filterrec (herbs|mining|treasure)|r - link display filter to recording for selected gathering type");
+		Gatherer_ChatPrint("  |cffffffff/gather debug ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.debug].."]|r - show/hide debug messages");
+		Gatherer_ChatPrint("  |cffffffff/gather p2p ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.p2p].."]|r - enable/disable peer-to-peer functions");
 	elseif (cmd == "options" ) then
 		if ( GathererUI_DialogFrame:IsVisible() ) then
 			GathererUI_HideOptions();
@@ -177,6 +179,14 @@ function Gatherer_Command(command)
 		elseif (param == "off") then
 			SETTINGS.debug = false;
 			Gatherer_ChatPrint("Debug messages disabled");
+		end
+	elseif (cmd == "p2p") then
+		if (not param or param == "" or param == "on") then
+			SETTINGS.p2p = true;
+			Gatherer_ChatPrint("Peer-to-peer functions enabled");
+		elseif (param == "off") then
+			SETTINGS.p2p = false;
+			Gatherer_ChatPrint("Peer-to-peer functions disabled");
 		end
 	elseif (cmd == "report" ) then
 		showGathererInfo(1);
@@ -746,18 +756,20 @@ function Gatherer_TimeCheck(timeDelta)
 	end
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
-	local args = {selectRandomGather()};
-	-- if failed to get a random node skip cycle
-	if not args[1] then
-		return
+	if Gatherer_Settings.p2p then
+		local args = {selectRandomGather()};
+		-- if failed to get a random node skip cycle
+		if not args[1] then
+			return
+		end
+		Gatherer_CycleCount = Gatherer_CycleCount + 1
+		if Gatherer_Settings.debug then
+			Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
+			Gatherer_ChatPrint('Gatherer: Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.');
+			Gatherer_ChatPrint('Gatherer: args to send: '..table.concat(args, ', '));
+		end
+		Gatherer_BroadcastGather(unpack(args))
 	end
-	Gatherer_CycleCount = Gatherer_CycleCount + 1
-	if Gatherer_Settings.debug then
-		Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
-		Gatherer_ChatPrint('Gatherer: Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.');
-		Gatherer_ChatPrint('Gatherer: args to send: '..table.concat(args, ', '));
-	end
-	Gatherer_BroadcastGather(unpack(args))
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
@@ -1672,8 +1684,10 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	end
 
 	local iconIndex = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
-	-- Broadcast to guild
-	Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
+	if Gatherer_Settings.p2p then
+		-- Broadcast to guild
+		Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
+	end
 
 	Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType, true);
 	Gatherer_OnUpdate(0,true);

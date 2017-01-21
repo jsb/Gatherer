@@ -50,7 +50,7 @@ end
 
 
 function Gatherer_AddonMessageEvent(prefix, message, type)
-	if not validPrefix(prefix) then
+	if (not Gatherer_Settings.p2p) or (not validPrefix(prefix)) then
         return
 	end
 	Gatherer_ReceiveBroadcast(message);

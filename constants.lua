@@ -49,3 +49,8 @@ GATHERER_NOTIFICATION_COLORS = {
 	[Gatherer_ENotificationType.info] = {0.235, 0.78, 0.9},
 	[Gatherer_ENotificationType.debug] = {1.0, 0.5, 0.25},
 }
+
+Gatherer_EBoolean = {
+	[true]='on',
+	[false]='off'
+}

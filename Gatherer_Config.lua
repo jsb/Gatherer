@@ -67,6 +67,8 @@ Default_Settings = {
 
 	-- debug
 	["debug"] = false,
+
+	['p2p'] = true,
 }
 
 --set per gather type defaults
