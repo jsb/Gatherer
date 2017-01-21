@@ -153,7 +153,7 @@ Gather_SkillLevel = {
 };
 
 -- Match tables for shorter DB format
--- converting iconIndex to iconName and vice versa
+-- converting IconIndex to IconName and vice versa
 function Gatherer_GetDB_IconIndex(iconIndex, gatherType)
 	-- type: (Icon, Optional[Gatherer_EGatherType]) -> Tuple[Icon, Optional[Gatherer_EGatherType]]
 	local iconName, gatherTypeIndex;

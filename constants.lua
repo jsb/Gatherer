@@ -1,4 +1,4 @@
--- Here will be all the constants, enums, types for type hinting, etc
+-- Here will be ~dragons~ all the constants, enums, types for type hinting, etc
 --
 
 -- Gatherer_EGatherType = {treasure=0, herb=1, ore=2}
@@ -33,3 +33,19 @@ end
 -- Icon = Union[IconName, IconIndex]
 
 -- GatherName = Text
+-- NodeInfo = Dict[Text, Union[int,float]]
+
+-- GathererDb = Dict[Continent, Dict[Zone, Dict[GatherName, List[NodeInfo]]]]
+
+GATHERER_NOTIFICATION_PREFIX = 'Gatherer: '
+
+Gatherer_ENotificationType = {
+	error = 10, warning = 20, info = 30, debug = 40
+}
+
+GATHERER_NOTIFICATION_COLORS = {
+	[Gatherer_ENotificationType.error] = {0.9, 0, 0},
+	[Gatherer_ENotificationType.warning] = {0.9, 0.9, 0},
+	[Gatherer_ENotificationType.info] = {0.235, 0.78, 0.9},
+	[Gatherer_ENotificationType.debug] = {1.0, 0.5, 0.25},
+}
