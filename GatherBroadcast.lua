@@ -114,7 +114,7 @@ function Gatherer_ReceiveBroadcast(message)
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
             Gatherer_ChatNotify(
                 Gatherer_coloredText(
-					sender, {157, 70, 223}
+					sender, {170, 115, 255}
 				) .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".",
 				Gatherer_ENotificationType.receiving
 			);

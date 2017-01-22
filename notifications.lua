@@ -16,7 +16,7 @@ GATHERER_NOTIFICATION_COLORS = {
 	[Gatherer_ENotificationType.error] = {230, 0, 0},
 	[Gatherer_ENotificationType.warning] = {230, 230, 0},
 	[Gatherer_ENotificationType.info] = {60, 200, 230},
-	[Gatherer_ENotificationType.sending] = {28, 82, 230},
+	[Gatherer_ENotificationType.sending] = {107, 140, 230},
 	[Gatherer_ENotificationType.receiving] = {28, 230, 28},
 	[Gatherer_ENotificationType.debug] = {255, 128, 64},
 }
