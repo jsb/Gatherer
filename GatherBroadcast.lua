@@ -8,8 +8,14 @@ function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX,
     if Gatherer_Settings.debug then
         local prettyNodeName = gather;
         local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
-        Gatherer_ChatPrint("Gatherer: Broadcasting new " .. prettyNodeName .. " node found in " .. prettyZoneName .. ".");
-        Gatherer_ChatPrint("Gatherer: gatherType: " .. gatherType .. ", gatherEventType: " .. gatherEventType .. ".");
+        Gatherer_ChatNotify(
+			"Broadcasting new " .. prettyNodeName .. " node found in " .. prettyZoneName .. ".",
+			Gatherer_ENotificationType.sending
+		);
+        Gatherer_ChatNotify(
+			"gatherType: " .. gatherType .. ", gatherEventType: " .. gatherEventType .. ".",
+			Gatherer_ENotificationType.sending
+		);
     end
 
     Gatherer_SendRawMessage(message);
@@ -105,8 +111,14 @@ function Gatherer_ReceiveBroadcast(message)
         if Gatherer_Settings.debug then
             local prettyNodeName = gather;
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
-            Gatherer_ChatPrint("Gatherer: " .. sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".");
-			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType)
+            Gatherer_ChatNotify(
+                sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".",
+				Gatherer_ENotificationType.receiving
+			);
+			Gatherer_ChatNotify(
+				'gatherType: '..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType,
+				Gatherer_ENotificationType.receiving
+			)
         end
         local newNodeFound = Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
         if Gatherer_Settings.debug then

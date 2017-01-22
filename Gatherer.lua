@@ -765,8 +765,13 @@ function Gatherer_TimeCheck(timeDelta)
 		Gatherer_CycleCount = Gatherer_CycleCount + 1
 		if Gatherer_Settings.debug then
 			Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
-			Gatherer_ChatPrint('Gatherer: Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.');
-			Gatherer_ChatPrint('Gatherer: args to send: '..table.concat(args, ', '));
+			Gatherer_ChatNotify(
+				'Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.',
+				Gatherer_ENotificationType.sending
+			);
+			Gatherer_ChatNotify(
+				'args to send: '..table.concat(args, ', '), Gatherer_ENotificationType.sending
+			);
 		end
 		Gatherer_BroadcastGather(unpack(args))
 	end
