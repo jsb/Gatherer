@@ -13,12 +13,12 @@ Gatherer_ENotificationType = {
 
 
 GATHERER_NOTIFICATION_COLORS = {
-	[Gatherer_ENotificationType.error] = {0.9, 0, 0},
-	[Gatherer_ENotificationType.warning] = {0.9, 0.9, 0},
-	[Gatherer_ENotificationType.info] = {0.235, 0.78, 0.9},
-	[Gatherer_ENotificationType.sending] = {0.11, 0.32, 0.9},
-	[Gatherer_ENotificationType.receiving] = {0.11, 0.9, 0.11},
-	[Gatherer_ENotificationType.debug] = {1.0, 0.5, 0.25},
+	[Gatherer_ENotificationType.error] = {230, 0, 0},
+	[Gatherer_ENotificationType.warning] = {230, 230, 0},
+	[Gatherer_ENotificationType.info] = {60, 200, 230},
+	[Gatherer_ENotificationType.sending] = {28, 82, 230},
+	[Gatherer_ENotificationType.receiving] = {28, 230, 28},
+	[Gatherer_ENotificationType.debug] = {255, 128, 64},
 }
 
 
@@ -46,7 +46,9 @@ function Gatherer_ChatNotify(str, notificationType)
 	-- usually DEFAULT_CHAT_FRAME is the default "General" chat window
 	if ( DEFAULT_CHAT_FRAME ) then
 		DEFAULT_CHAT_FRAME:AddMessage(
-			prefix..str, unpack(GATHERER_NOTIFICATION_COLORS[notificationType])
+			prefix..str, unpack(
+				Gatherer_rgbToFloatColor(GATHERER_NOTIFICATION_COLORS[notificationType])
+			)
 		);
 	end
 end

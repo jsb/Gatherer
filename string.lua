@@ -10,3 +10,18 @@ function Gatherer_split(str, sep)
 	gsub(str, pattern, function(c) tinsert(fields, c) end)
 	return fields
 end
+
+
+local function hexColor(color)
+	-- type: (Color) -> HexColor
+	local hexColor = {};
+	for _, component in color do
+		tinsert(hexColor, format('%x', component))
+	end
+	return table.concat(hexColor)
+end
+
+
+function Gatherer_coloredText(str, color)
+	return '|cff'..hexColor(color)..str..'|r'
+end

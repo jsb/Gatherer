@@ -104,6 +104,7 @@ function Gatherer_DecodeGather(message)
     return sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType;
 end
 
+
 function Gatherer_ReceiveBroadcast(message)
     local sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType = Gatherer_DecodeGather(message);
     assert(type(iconIndex) == 'number')
@@ -112,7 +113,9 @@ function Gatherer_ReceiveBroadcast(message)
             local prettyNodeName = gather;
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
             Gatherer_ChatNotify(
-                sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".",
+                Gatherer_coloredText(
+					sender, {157, 70, 223}
+				) .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".",
 				Gatherer_ENotificationType.receiving
 			);
 			Gatherer_ChatNotify(

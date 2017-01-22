@@ -37,6 +37,10 @@ end
 
 -- GathererDb = Dict[Continent, Dict[Zone, Dict[GatherName, List[NodeInfo]]]]
 
+-- Color = Tuple[int, int, int] -- r, g, b
+-- FloatColor = Tuple[float, float, float]
+-- HexColor = Text
+
 Gatherer_EBoolean = {
 	[true]='on',
 	[false]='off'
