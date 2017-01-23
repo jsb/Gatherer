@@ -27,7 +27,7 @@ VERSION_REG_EXP = '(%d+)\.(%d+)\.(%d+)';
 
 local function extractVersion(str)
     -- type(Text) -> Tuple[int, int, int]
-    local major, minor, fix = Gatherer_split(str, '.')
+    local major, minor, fix = unpack(Gatherer_split(str, '.'))
     return {tonumber(major), tonumber(minor), tonumber(fix)}
 end
 
@@ -35,8 +35,10 @@ end
 local function validPrefix(prefix)
     -- type: (Text) -> bool
     -- Return true if prefix has correct format and acceptable version.
-    -- Message format is considered broken if *minor version* changes.
-    -- Thus fix builds by sermver will be compatible with each other.
+    -- Message format is considered broken *every tenth* minor version.
+    -- E.g. 1.0.x and 1.9.x are compatible, 1.0.x and 1.10.x are not.
+	-- Thus when breaking message format don't forget to switch to the next ten
+	-- in the minor version.
 
     -- check overall prefix format
     local prefixPos = strfind(
@@ -45,10 +47,20 @@ local function validPrefix(prefix)
     if (not prefixPos) then
         return
 	end
+
+	local versionPos = strfind(prefix, VERSION_REG_EXP)
+	local prefixVersionStr = strsub(prefix, versionPos)
 	-- check version components
-    local prefixVersion = extractVersion(prefix)
-    local currentVersion = extractVersion(GATHERER_VERSION)
-    if prefixVersion[1] ~= currentVersion[1] or prefixVersion[2] ~= currentVersion[2] then
+    local prefixVersion = extractVersion(prefixVersionStr);
+    local currentVersion = extractVersion(GATHERER_VERSION);
+	Gatherer_ChatNotify(
+		'Message version: '..table.concat(prefixVersion, ', ')..' vs '..table.concat(currentVersion, ', '),
+		Gatherer_ENotificationType.debug
+	)
+    if (
+		(prefixVersion[1] ~= currentVersion[1])
+		or (floor(prefixVersion[2]/10) ~= floor(currentVersion[2]/10))
+	) then
         return
     end
 	return true
