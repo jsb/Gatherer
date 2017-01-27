@@ -8,8 +8,14 @@ function Gatherer_BroadcastGather(gather, gatherType, gatherC, gatherZ, gatherX,
     if Gatherer_Settings.debug then
         local prettyNodeName = gather;
         local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
-        Gatherer_ChatPrint("Gatherer: Broadcasting new " .. prettyNodeName .. " node found in " .. prettyZoneName .. ".");
-        Gatherer_ChatPrint("Gatherer: gatherType: " .. gatherType .. ", gatherEventType: " .. gatherEventType .. ".");
+        Gatherer_ChatNotify(
+			"Broadcasting new " .. prettyNodeName .. " node found in " .. prettyZoneName .. ".",
+			Gatherer_ENotificationType.sending
+		);
+        Gatherer_ChatNotify(
+			"gatherType: " .. gatherType .. ", gatherEventType: " .. gatherEventType .. ".",
+			Gatherer_ENotificationType.sending
+		);
     end
 
     Gatherer_SendRawMessage(message);
@@ -21,7 +27,7 @@ VERSION_REG_EXP = '(%d+)\.(%d+)\.(%d+)';
 
 local function extractVersion(str)
     -- type(Text) -> Tuple[int, int, int]
-    local major, minor, fix = Gatherer_split(str, '.')
+    local major, minor, fix = unpack(Gatherer_split(str, '.'))
     return {tonumber(major), tonumber(minor), tonumber(fix)}
 end
 
@@ -29,8 +35,10 @@ end
 local function validPrefix(prefix)
     -- type: (Text) -> bool
     -- Return true if prefix has correct format and acceptable version.
-    -- Message format is considered broken if *minor version* changes.
-    -- Thus fix builds by sermver will be compatible with each other.
+    -- Message format is considered broken *every tenth* minor version.
+    -- E.g. 1.0.x and 1.9.x are compatible, 1.0.x and 1.10.x are not.
+	-- Thus when breaking message format don't forget to switch to the next ten
+	-- in the minor version.
 
     -- check overall prefix format
     local prefixPos = strfind(
@@ -39,10 +47,20 @@ local function validPrefix(prefix)
     if (not prefixPos) then
         return
 	end
+
+	local versionPos = strfind(prefix, VERSION_REG_EXP)
+	local prefixVersionStr = strsub(prefix, versionPos)
 	-- check version components
-    local prefixVersion = extractVersion(prefix)
-    local currentVersion = extractVersion(GATHERER_VERSION)
-    if prefixVersion[1] ~= currentVersion[1] or prefixVersion[2] ~= currentVersion[2] then
+    local prefixVersion = extractVersion(prefixVersionStr);
+    local currentVersion = extractVersion(GATHERER_VERSION);
+	Gatherer_ChatNotify(
+		'Message version: '..table.concat(prefixVersion, ', ')..' vs '..table.concat(currentVersion, ', '),
+		Gatherer_ENotificationType.debug
+	)
+    if (
+		(prefixVersion[1] ~= currentVersion[1])
+		or (floor(prefixVersion[2]/10) ~= floor(currentVersion[2]/10))
+	) then
         return
     end
 	return true
@@ -50,7 +68,7 @@ end
 
 
 function Gatherer_AddonMessageEvent(prefix, message, type)
-	if not validPrefix(prefix) then
+	if (not Gatherer_Settings.p2p) or (not validPrefix(prefix)) then
         return
 	end
 	Gatherer_ReceiveBroadcast(message);
@@ -98,6 +116,7 @@ function Gatherer_DecodeGather(message)
     return sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType;
 end
 
+
 function Gatherer_ReceiveBroadcast(message)
     local sender, gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType = Gatherer_DecodeGather(message);
     assert(type(iconIndex) == 'number')
@@ -105,10 +124,25 @@ function Gatherer_ReceiveBroadcast(message)
         if Gatherer_Settings.debug then
             local prettyNodeName = gather;
             local prettyZoneName = GatherRegionData[gatherC][gatherZ].name;
-            Gatherer_ChatPrint("Gatherer: " .. sender .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".");
-			Gatherer_ChatPrint("Gatherer: gatherType: "..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType)
+            Gatherer_ChatNotify(
+                Gatherer_coloredText(
+					sender, {170, 115, 255}
+				) .. " discovered a new " .. prettyNodeName .. " node in " .. prettyZoneName .. ".",
+				Gatherer_ENotificationType.receiving
+			);
+			Gatherer_ChatNotify(
+				'gatherType: '..gatherType..', iconIndex: '.. iconIndex ..', gatherEventType: '..gatherEventType,
+				Gatherer_ENotificationType.receiving
+			)
         end
-        Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+        local newNodeFound = Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+        if Gatherer_Settings.debug then
+            if newNodeFound then
+				Gatherer_ChatNotify('It was a new node!', Gatherer_ENotificationType.info)
+            else
+                Gatherer_ChatNotify('It was a duplicate.', Gatherer_ENotificationType.warning)
+            end
+        end
     end
 end
 

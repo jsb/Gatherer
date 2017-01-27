@@ -12,6 +12,7 @@
 ## OptionalDeps: myAddOns
 constants.lua
 string.lua
+math.lua
 notifications.lua
 database.lua
 Gatherer.xml
