@@ -866,92 +866,87 @@ function Gatherer_OnUpdate(timeDelta, force)
 			local closestPos, closestGather, closestID;
 			local currentPos = 1;
 			for closestPos, closestGather in ClosestGathers.items do
-				local skip_node = 0;
+				if ( currentPos > SETTINGS.number ) then break; end
 
-				if ( currentPos > SETTINGS.number ) then skip_node =1; end
+				-- need to position and label the corresponding button
+				local gatherNote = getglobal("GatherNote"..currentPos);
+				local gatherNoteTexture = getglobal("GatherNote"..currentPos.."Texture");
 
-				if ( skip_node == 0 ) then
-					-- need to position and label the corresponding button
-					local gatherNote = getglobal("GatherNote"..currentPos);
-					local gatherNoteTexture = getglobal("GatherNote"..currentPos.."Texture");
+				local itemDeltaX = closestGather.deltax+playerDeltaX;
+				local itemDeltaY = closestGather.deltay+playerDeltaY;
+				local offsX, offsY, gDist = Gatherer_MiniMapPos(itemDeltaX, itemDeltaY, ClosestGathers.scaleX, ClosestGathers.scaleY);
+				gatherNote:SetPoint("CENTER", Minimap, "CENTER", offsX, -offsY);
 
-					local itemDeltaX = closestGather.deltax+playerDeltaX;
-					local itemDeltaY = closestGather.deltay+playerDeltaY;
-					local offsX, offsY, gDist = Gatherer_MiniMapPos(itemDeltaX, itemDeltaY, ClosestGathers.scaleX, ClosestGathers.scaleY);
-					gatherNote:SetPoint("CENTER", Minimap, "CENTER", offsX, -offsY);
+				local iconSet = SETTINGS.iconSet;
+				local iDist = SETTINGS.miniIconDist;
+				if (not iconSet) then iconSet = "shaded"; end
+				if (not iDist) then iDist = 38; end
 
-					local iconSet = SETTINGS.iconSet;
-					local iDist = SETTINGS.miniIconDist;
-					if (not iconSet) then iconSet = "shaded"; end
-					if (not iDist) then iDist = 38; end
+				local _, _, sDist = Gatherer_MiniMapPos(iDist/10000, 0, ClosestGathers.scaleX, ClosestGathers.scaleY);
 
-					local _, _, sDist = Gatherer_MiniMapPos(iDist/10000, 0, ClosestGathers.scaleX, ClosestGathers.scaleY);
+				if ((iDist > 0) and (gDist > (math.floor(sDist)-1))) then
+					iconSet = "iconic";
+				end
 
-					if ((iDist > 0) and (gDist > (math.floor(sDist)-1))) then
-						iconSet = "iconic";
-					end
+				local fadeDist = SETTINGS.fadeDist / 1000;
+				local fadePerc = SETTINGS.fadePerc / 100;
+				local alpha = 1.0;
+				local objDist = Gatherer_Pythag(itemDeltaX, itemDeltaY);
+				if ((fadeDist > 0) and (fadePerc > 0)) then
+					local distRatio = objDist / fadeDist ;
+					alpha = 1.0 - (math.min(1.0, math.max(0.0, distRatio)) * fadePerc);
+				end
 
-					local fadeDist = SETTINGS.fadeDist / 1000;
-					local fadePerc = SETTINGS.fadePerc / 100;
-					local alpha = 1.0;
-					local objDist = Gatherer_Pythag(itemDeltaX, itemDeltaY);
-					if ((fadeDist > 0) and (fadePerc > 0)) then
-						local distRatio = objDist / fadeDist ;
-						alpha = 1.0 - (math.min(1.0, math.max(0.0, distRatio)) * fadePerc);
-					end
+				local textureType = closestGather.item.gtype;
+				local textureIcon = closestGather.item.icon;
 
-					local textureType = closestGather.item.gtype;
-					local textureIcon = closestGather.item.icon;
+				if ( type(textureType) == "number" ) then
+					textureType = Gatherer_EGatherType[textureType];
+				end
 
-					if ( type(textureType) == "number" ) then
-						textureType = Gatherer_EGatherType[textureType];
-					end
+				if ( type(textureIcon) == "number" ) then
+					textureIcon = Gatherer_GetDB_IconIndex(textureIcon, textureType);
+				end
 
-					if ( type(textureIcon) == "number" ) then
-						textureIcon = Gatherer_GetDB_IconIndex(textureIcon, textureType);
-					end
-
-					if (not textureIcon) then textureIcon = "default"; end;
-					if (SETTINGS.iconSet == "iconshade" )
+				if (not textureIcon) then textureIcon = "default"; end;
+				if (SETTINGS.iconSet == "iconshade" )
+				then
+					iconSet="iconic";
+					if ( gDist < (math.floor(sDist)-1) )
 					then
-						iconSet="iconic";
-						if ( gDist < (math.floor(sDist)-1) )
-						then
-							alpha=0.4;
-						end
+						alpha=0.4;
 					end
-					if (not Gather_IconSet[iconSet]) then iconSet = "shaded"; end
-					if (not Gather_IconSet[iconSet][textureType]) then textureType = "Default"; end
-					local selectedTexture = Gather_IconSet[iconSet][textureType][textureIcon];
-					if (not selectedTexture) then
-						selectedTexture = Gather_IconSet[iconSet][textureType]["default"];
-					end
+				end
+				if (not Gather_IconSet[iconSet]) then iconSet = "shaded"; end
+				if (not Gather_IconSet[iconSet][textureType]) then textureType = "Default"; end
+				local selectedTexture = Gather_IconSet[iconSet][textureType][textureIcon];
+				if (not selectedTexture) then
+					selectedTexture = Gather_IconSet[iconSet][textureType]["default"];
+				end
 
-					gatherNoteTexture:SetTexture(selectedTexture);
-					gatherNote:SetFrameLevel(MiniMapTrackingFrame:GetFrameLevel());
-					gatherNote:SetAlpha(alpha);
+				gatherNoteTexture:SetTexture(selectedTexture);
+				gatherNote:SetFrameLevel(MiniMapTrackingFrame:GetFrameLevel());
+				gatherNote:SetAlpha(alpha);
 
-					-- Added to allow hiding if under min distance
-					if ( SETTINGS.NoIconOnMinDist ~= nil and SETTINGS.NoIconOnMinDist == 1 ) then
-						if ( gDist < (math.floor(sDist)-1) ) then
-							gatherNote:Hide();
-						else
-							gatherNote:Show();
-						end
-					elseif ( (not SETTINGS.NoIconOnMinDist or SETTINGS.NoIconOnMinDist == 0) and SETTINGS.alphaUnderMinIcon and gDist < (math.floor(sDist)-1) ) then
-						if ( SETTINGS.iconSet and SETTINGS.iconSet ~= "iconshade" ) then
-							gatherNote:SetAlpha(SETTINGS.alphaUnderMinIcon / 100);
-						end
-						gatherNote:Show();
+				-- Added to allow hiding if under min distance
+				if ( SETTINGS.NoIconOnMinDist ~= nil and SETTINGS.NoIconOnMinDist == 1 ) then
+					if ( gDist < (math.floor(sDist)-1) ) then
+						gatherNote:Hide();
 					else
 						gatherNote:Show();
 					end
-
-					if (currentPos > maxPos) then maxPos = currentPos; end
-
-					currentPos = currentPos + 1;
+				elseif ( (not SETTINGS.NoIconOnMinDist or SETTINGS.NoIconOnMinDist == 0) and SETTINGS.alphaUnderMinIcon and gDist < (math.floor(sDist)-1) ) then
+					if ( SETTINGS.iconSet and SETTINGS.iconSet ~= "iconshade" ) then
+						gatherNote:SetAlpha(SETTINGS.alphaUnderMinIcon / 100);
+					end
+					gatherNote:Show();
+				else
+					gatherNote:Show();
 				end
-				skip_node = 0;
+
+				if (currentPos > maxPos) then maxPos = currentPos; end
+
+				currentPos = currentPos + 1;
 			end
 		end
 
