@@ -712,7 +712,8 @@ local function selectRandomGather()
 	end
 
 	local eventType = 1; -- EGatherEventType.no_skill
-	-- values don't matter, I just hate lua
+	-- Values don't matter, I just hate lua
+	-- for this `if in` pattern.
 	local FISHING_GATHERS = {['floating wreckage']=0, ['school']=''};
 	if FISHING_GATHERS[randomGather] then
 		eventType = 2; -- EGatherEventType.fishing

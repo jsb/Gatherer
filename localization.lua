@@ -14,6 +14,7 @@ ORE_CLASS_DEPOSIT_DEFAULT ="deposit"
 ORE_RTHORIUM_DEFAULT  ="thorium (rich)"
 ORE_DARKIRON_DEFAULT  ="dark iron"
 
+
 function Gatherer_FindOreType_default(input)
 	local i,j, oreType, oreClass, oreTypeClass;
 
@@ -33,35 +34,78 @@ function Gatherer_FindOreType_default(input)
 end
 
 
+GATHERER_NOTEXT_DEFAULT="([-]) no text "
+
+TREASURE_BOX_DEFAULT        	="box"
+TREASURE_CHEST_DEFAULT      	="chest"
+TREASURE_CLAM_DEFAULT       	="giant clam"
+TREASURE_CRATE_DEFAULT      	="crate"
+TREASURE_BARREL_DEFAULT     	="barrel"
+TREASURE_CASK_DEFAULT       	="cask"
+TREASURE_FOOTLOCKER_DEFAULT 	= "footlocker"
+
+TREASURE_UNGOROSOIL_DEFAULT 	= "un'goro soil"
+TREASURE_UNGOROSOIL_G_DEFAULT	= "dirt pile"
+TREASURE_BLOODPETAL_DEFAULT 	= "bloodpetal"
+TREASURE_BLOODPETAL_G_DEFAULT 	= "bloodpetal sprout"
+TREASURE_POWERCRYST_DEFAULT 	= "power crystal"
+
+TREASURE_BLOODHERO_DEFAULT  	= "blood of heroes"
+
+TREASURE_SHELLFISHTRAP_DEFAULT	="shellfish trap"
+
+TREASURE_FISHNODE_TRIGGER1_DEFAULT	= "Trunk";
+--	TREASURE_FISHNODE_TRIGGER2	= "Bloated"; -- no longer found in wreckage in 1.11
+TREASURE_FISHNODE_TRIGGER3_DEFAULT	= "swarm";
+TREASURE_FISHNODE_TRIGGER4_DEFAULT	= "school";
+TREASURE_FISHNODE_TRIGGER5_DEFAULT	= "floating wreckage";
+TREASURE_FISHNODE_TRIGGER6_DEFAULT	= "oil spill";
+TREASURE_FISHNODE_TRIGGER7_DEFAULT	= "patch of elemental water";
+
+TREASURE_FISHNODE_DEFAULT		= "school";
+TREASURE_FISHWRECK_DEFAULT		= TREASURE_FISHNODE_TRIGGER5_DEFAULT;
+TREASURE_FISHELEM_DEFAULT		= TREASURE_FISHNODE_TRIGGER7_DEFAULT;
+TREASURE_NIGHTDRAGON_DEFAULT 	= "night dragon"
+TREASURE_WHIPPERROOT_DEFAULT 	= "whipper root"
+TREASURE_WINDBLOSSOM_DEFAULT 	= "windblossom"
+TREASURE_SONGFLOWER_DEFAULT 	= "songflower"
+
+TREASURE_REGEX_DEFAULT = {
+	[1] = " ([^ ]+)$",
+	[2] = "^([^ ]+)",
+	[3] = "([^ ]+) ([^ ]+) ",
+};
+
 function Gatherer_FindTreasureType_default(in_input)
 	local iconName, input;
 
-	input = string.gsub(in_input, GATHERER_NOTEXT, "")
+	input = string.gsub(in_input, GATHERER_NOTEXT_DEFAULT, "")
 
-	if ( string.find(input, TREASURE_UNGOROSOIL_G) or string.find(input, TREASURE_UNGOROSOIL)) then
-		return TREASURE_UNGOROSOIL, TREASURE_UNGOROSOIL;
+	local EDGE_CASES = {
+		[TREASURE_UNGOROSOIL_DEFAULT] = {TREASURE_UNGOROSOIL_DEFAULT, TREASURE_UNGOROSOIL_G_DEFAULT},
+		[TREASURE_POWERCRYST_DEFAULT] = {TREASURE_POWERCRYST_DEFAULT},
+		[TREASURE_BLOODHERO_DEFAULT] = {TREASURE_BLOODHERO_DEFAULT},
+	}
+	for result, candidates in EDGE_CASES do
+		for _, candidate in candidates do
+			if string.find(input, candidate) then
+				return result, result;
+			end
+		end
 	end
 
-	if (string.find(input, TREASURE_POWERCRYST) ) then
-		return TREASURE_POWERCRYST, TREASURE_POWERCRYST;
+	if (string.find(input, TREASURE_BLOODPETAL_G_DEFAULT) or string.find(input, TREASURE_BLOODPETAL_DEFAULT)) then
+		return TREASURE_BLOODPETAL_DEFAULT, TREASURE_BLOODPETAL_G_DEFAULT;
 	end
 
-	if (string.find(input, TREASURE_BLOODPETAL_G) or string.find(input, TREASURE_BLOODPETAL)) then
-		return TREASURE_BLOODPETAL, TREASURE_BLOODPETAL_G;
-	end
-
-	if (string.find(input, TREASURE_BLOODHERO) ) then
-		return TREASURE_BLOODHERO, TREASURE_BLOODHERO;
-	end
-
-	for iconName in Gather_DB_IconIndex[0] do
+	for iconName in Gather_DB_IconIndex[Gatherer_EGatherType.treasure] do
 		local index, treasure_regex, i, j, treasType;
 		if ( input == iconName ) then
 			return iconName;
 		end
 
 		if ( string.find(input, iconName) ) then
-			for index, treasure_regex in TREASURE_REGEX do
+			for index, treasure_regex in TREASURE_REGEX_DEFAULT do
 				i,j, treasType = string.find(input, treasure_regex);
 				if ( treasType and treasType == iconName ) then
 					return iconName;
@@ -273,7 +317,7 @@ if ( GetLocale() == "frFR" ) then
 				end
 			end
 		end
-		return;
+		return Gatherer_FindTreasureType_default(in_input);
 	end
 -- Common Values, Functions
 TYPE_RARE		= "Rare";
@@ -471,7 +515,7 @@ elseif ( GetLocale() == "deDE" ) then
 				return iconName;
 			end
 		end
-		return;
+		return Gatherer_FindTreasureType_default(in_input);
 	end
 -- Common Values, Functions
 TYPE_RARE		= "Rare";
@@ -664,7 +708,7 @@ elseif (  GetLocale() == "zhCN"  ) then
 				end
 			end
 		end
-		return;
+		return Gatherer_FindTreasureType_default(in_input);
 	end
 -- Common Values, Functions
 TYPE_RARE		= "Rare";
@@ -862,7 +906,7 @@ elseif ( GetLocale() == "ruRU" ) then
 			return TREASURE_SONGFLOWER;
 		end
 
-		return;
+		return Gatherer_FindTreasureType_default(input);
 	end
 
 TYPE_RARE		= "Редкое";
@@ -870,7 +914,7 @@ TYPE_RARE		= "Редкое";
 else
 	-- English localized variables (default)
 	GATHERER_VERSION_WARNING="New Gatherer Version detected, check zone match.";
-	GATHERER_NOTEXT="([-]) no text "
+	GATHERER_NOTEXT=GATHERER_NOTEXT_DEFAULT
 
 	-- TRADE NAME
 	TRADE_HERBALISM="Herbalism"
@@ -944,93 +988,47 @@ else
 	HERB_WILDVINE	       ="wildvine"
 
 	-- treasure types
-	TREASURE_BOX        	="box"
-	TREASURE_CHEST      	="chest"
-	TREASURE_CLAM       	="giant clam"
-	TREASURE_CRATE      	="crate"
-	TREASURE_BARREL     	="barrel"
-	TREASURE_CASK       	="cask"
-	TREASURE_SHELLFISHTRAP	="shellfish trap"
-	TREASURE_FOOTLOCKER 	= "footlocker"
+	TREASURE_BOX        	=TREASURE_BOX_DEFAULT
+	TREASURE_CHEST      	=TREASURE_CHEST_DEFAULT
+	TREASURE_CLAM       	=TREASURE_CLAM_DEFAULT
+	TREASURE_CRATE      	=TREASURE_CRATE_DEFAULT
+	TREASURE_BARREL     	=TREASURE_BARREL_DEFAULT
+	TREASURE_CASK       	=TREASURE_CASK_DEFAULT
+	TREASURE_SHELLFISHTRAP	=TREASURE_SHELLFISHTRAP_DEFAULT
+	TREASURE_FOOTLOCKER 	= TREASURE_FOOTLOCKER_DEFAULT
 
-	TREASURE_BLOODHERO  	= "blood of heroes"
+	TREASURE_BLOODHERO  	= TREASURE_BLOODHERO_DEFAULT
 
-	TREASURE_UNGOROSOIL 	= "un'goro soil"
-	TREASURE_UNGOROSOIL_G	= "dirt pile"
-	TREASURE_BLOODPETAL 	= "bloodpetal"
-	TREASURE_BLOODPETAL_G 	= "bloodpetal sprout"
-	TREASURE_POWERCRYST 	= "power crystal"
+	TREASURE_UNGOROSOIL 	= TREASURE_UNGOROSOIL_DEFAULT
+	TREASURE_UNGOROSOIL_G	= TREASURE_UNGOROSOIL_G_DEFAULT
+	TREASURE_BLOODPETAL 	= TREASURE_BLOODPETAL_DEFAULT
+	TREASURE_BLOODPETAL_G 	= TREASURE_BLOODPETAL_G_DEFAULT
+	TREASURE_POWERCRYST 	= TREASURE_POWERCRYST_DEFAULT
 
-	TREASURE_NIGHTDRAGON 	= "night dragon"
-	TREASURE_WHIPPERROOT 	= "whipper root"
-	TREASURE_WINDBLOSSOM 	= "windblossom"
-	TREASURE_SONGFLOWER 	= "songflower"
+	TREASURE_NIGHTDRAGON 	= TREASURE_NIGHTDRAGON_DEFAULT
+	TREASURE_WHIPPERROOT 	= TREASURE_WHIPPERROOT_DEFAULT
+	TREASURE_WINDBLOSSOM 	= TREASURE_WINDBLOSSOM_DEFAULT
+	TREASURE_SONGFLOWER 	= TREASURE_SONGFLOWER_DEFAULT
 
-	TREASURE_FISHNODE_TRIGGER1	= "Trunk";
+	TREASURE_FISHNODE_TRIGGER1	= TREASURE_FISHNODE_TRIGGER1_DEFAULT;
 --	TREASURE_FISHNODE_TRIGGER2	= "Bloated"; -- no longer found in wreckage in 1.11
-	TREASURE_FISHNODE_TRIGGER3	= "swarm";
-	TREASURE_FISHNODE_TRIGGER4	= "school";
-	TREASURE_FISHNODE_TRIGGER5	= "floating wreckage";
-	TREASURE_FISHNODE_TRIGGER6	= "oil spill";
-	TREASURE_FISHNODE_TRIGGER7	= "patch of elemental water";
+	TREASURE_FISHNODE_TRIGGER3	= TREASURE_FISHNODE_TRIGGER3_DEFAULT;
+	TREASURE_FISHNODE_TRIGGER4	= TREASURE_FISHNODE_TRIGGER4_DEFAULT;
+	TREASURE_FISHNODE_TRIGGER5	= TREASURE_FISHNODE_TRIGGER5_DEFAULT;
+	TREASURE_FISHNODE_TRIGGER6	= TREASURE_FISHNODE_TRIGGER6_DEFAULT;
+	TREASURE_FISHNODE_TRIGGER7	= TREASURE_FISHNODE_TRIGGER7_DEFAULT;
 
-	TREASURE_FISHNODE		= "school";
-	TREASURE_FISHWRECK		= TREASURE_FISHNODE_TRIGGER5;
-	TREASURE_FISHELEM		= TREASURE_FISHNODE_TRIGGER7;
+	TREASURE_FISHNODE		= TREASURE_FISHNODE_DEFAULT;
+	TREASURE_FISHWRECK		= TREASURE_FISHWRECK_DEFAULT;
+	TREASURE_FISHELEM		= TREASURE_FISHELEM_DEFAULT;
 
 	GATHERER_ReceivesLoot		= "You receive loot: (.+)%.";
 
-	TREASURE_REGEX = {
-		[1] = " ([^ ]+)$",
-		[2] = "^([^ ]+)",
-		[3] = "([^ ]+) ([^ ]+) ",
-	};
+	TREASURE_REGEX = TREASURE_REGEX_DEFAULT
 
 	Gatherer_FindOreType = Gatherer_FindOreType_default;
 
-	function Gatherer_FindTreasureType(in_input)
-		local iconName, input;
-
-		input = string.gsub(in_input, GATHERER_NOTEXT, "")
-
-		if ( string.find(input, TREASURE_UNGOROSOIL_G) or string.find(input, TREASURE_UNGOROSOIL)) then
-			return TREASURE_UNGOROSOIL, TREASURE_UNGOROSOIL;
-		end
-
-		if (string.find(input, TREASURE_POWERCRYST) ) then
-			return TREASURE_POWERCRYST, TREASURE_POWERCRYST;
-		end
-
-		if (string.find(input, TREASURE_BLOODPETAL_G) or string.find(input, TREASURE_BLOODPETAL)) then
-			return TREASURE_BLOODPETAL, TREASURE_BLOODPETAL_G;
-		end
-
-		if (string.find(input, TREASURE_BLOODHERO) ) then
-			return TREASURE_BLOODHERO, TREASURE_BLOODHERO;
-		end
-
-		for iconName in Gather_DB_IconIndex[0] do
-			local index, treasure_regex, i, j, treasType;
-			if ( input == iconName ) then
-				return iconName;
-			end
-
-			if ( string.find(input, iconName) ) then
-				for index, treasure_regex in TREASURE_REGEX do
-					i,j, treasType = string.find(input, treasure_regex);
-					if ( treasType and treasType == iconName ) then
-						return iconName;
-					end
-
-					i,j, _, treasType = string.find(input, treasure_regex);
-					if ( treasType and treasType == iconName ) then
-						return iconName;
-					end
-				end
-			end
-		end
-		return;
-	end
+	Gatherer_FindTreasureType = Gatherer_FindTreasureType_default;
 -- Common Values, Functions
 TYPE_RARE		= "Rare";
 end
