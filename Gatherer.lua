@@ -1056,6 +1056,8 @@ function GatherMain_Draw()
 						gatherType = Gatherer_EGatherType.treasure;
 						allowed = Gatherer_GetFilter("treasure");
 					else
+						-- fishTooltip is empty here!
+						-- very unlikely this branch ever works
 						specificType = Gatherer_FindFishType(gatherName);
 						if ( specificType ) then -- Treasure Fish
 							gatherType = Gatherer_EGatherType.treasure;
@@ -1160,18 +1162,6 @@ function GatherMain_Draw()
 							else
 								gatherType = gatherTypeName;
 							end
-							if debug_first_icon then
-								Gatherer_ChatNotify(
-									'Icon on global map: '..Gatherer_table_to_string({
-										gatherType=gatherType, specificType=specificType,
-										gatherTypeName= gatherTypeName
-									})..'\nIcons: '..Gatherer_table_to_string(
-										Gather_IconSet["iconic"][gatherTypeName]
-									),
-									Gatherer_ENotificationType.debug
-								);
-								debug_first_icon = false;
-							end
 							if ( type(specificType) == "number" ) then
 								specificType = Gatherer_GetDB_IconIndex(specificType, gatherTypeName);
 							end
@@ -1190,6 +1180,19 @@ function GatherMain_Draw()
 							end
 							assert(type(iconIndex) == 'number')
 							local iconName = Gatherer_GetDB_IconIndex(nodeInfo.icon, gatherType);
+							if debug_first_icon and gatherName == 'school' then
+								Gatherer_ChatNotify(
+									'Icon on global map: '..Gatherer_table_to_string({
+										gatherType=gatherType, specificType=specificType,
+										gatherTypeName= gatherTypeName,
+										iconIndex=iconIndex, iconName=iconName,
+									})..'\nIcons: '..Gatherer_table_to_string(
+										Gather_IconSet["iconic"][gatherTypeName]
+									),
+									Gatherer_ENotificationType.debug
+								);
+								debug_first_icon = false;
+							end
 							local texture = Gather_IconSet["iconic"][gatherTypeName][iconName];
 							if (not texture) then
 								texture = Gather_IconSet["iconic"][gatherType]["default"];

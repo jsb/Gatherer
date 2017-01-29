@@ -98,7 +98,7 @@ function Gatherer_FindTreasureType_default(in_input)
 		return TREASURE_BLOODPETAL_DEFAULT, TREASURE_BLOODPETAL_G_DEFAULT;
 	end
 
-	for iconName in Gather_DB_IconIndex[Gatherer_EGatherType.treasure] do
+	for iconName in Gather_DB_IconIndex_default[Gatherer_EGatherType.treasure] do
 		local index, treasure_regex, i, j, treasType;
 		if ( input == iconName ) then
 			return iconName;
@@ -119,6 +119,29 @@ function Gatherer_FindTreasureType_default(in_input)
 		end
 	end
 	return;
+end
+
+function Gatherer_FindFishType_default(fishItem, fishTooltip)
+	if ( fishItem  and (strfind(fishItem, TREASURE_FISHNODE_TRIGGER1_DEFAULT) ))
+	then
+		return TREASURE_FISHWRECK_DEFAULT;
+		-- Fish School
+	elseif ( fishTooltip and (strfind(fishTooltip, TREASURE_FISHNODE_TRIGGER4_DEFAULT) or
+			(TREASURE_FISHNODE_TRIGGER3_DEFAULT and strfind(fishTooltip, TREASURE_FISHNODE_TRIGGER3_DEFAULT))))
+	then
+		return TREASURE_FISHNODE_DEFAULT;
+		-- Floating Wreckage and Oil Spill
+	elseif ( fishTooltip and
+			(strfind(fishTooltip, TREASURE_FISHNODE_TRIGGER5_DEFAULT) or
+					strfind(fishTooltip, TREASURE_FISHNODE_TRIGGER6_DEFAULT)))
+	then
+		return TREASURE_FISHWRECK_DEFAULT;
+		-- Elemental Water
+	elseif ( fishTooltip and strfind(fishTooltip, TREASURE_FISHNODE_TRIGGER7_DEFAULT) )
+	then
+		return TREASURE_FISHELEM_DEFAULT;
+	end
+	return nil;
 end
 
 if ( GetLocale() == "frFR" ) then
@@ -1064,7 +1087,7 @@ function Gatherer_FindFishType(fishItem, fishTooltip)
 		then
 			return TREASURE_FISHELEM;
 		end
-	return nil;
+	return Gatherer_FindFishType_default(fishItem, fishTooltip);
 end
 
 function Gatherer_FindHerbType(gather)

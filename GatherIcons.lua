@@ -214,6 +214,32 @@ end
 -- 2 => Ores
 -- Note: If you add new items, use icon index numbers starting from 100
 
+-- english defaults as a fallback
+Gather_DB_IconIndex_default = {}; -- type: Dict[GatherTypeIndex, Dict[IconName, IconIndex]]
+Gather_DB_IconIndex_default[Gatherer_EGatherType.treasure] = {
+	["default"]             = 0,
+	[TREASURE_BOX_DEFAULT]          = 1,
+	[TREASURE_CHEST_DEFAULT]        = 2,
+	[TREASURE_CLAM_DEFAULT]         = 3,
+	[TREASURE_CRATE_DEFAULT]        = 4,
+	[TREASURE_BARREL_DEFAULT]       = 5,
+	[TREASURE_CASK_DEFAULT]         = 6,
+	[TREASURE_FOOTLOCKER_DEFAULT]   = 7,
+	[TREASURE_UNGOROSOIL_DEFAULT]   = 8,
+	[TREASURE_BLOODPETAL_DEFAULT]   = 9,
+	[TREASURE_POWERCRYST_DEFAULT]   = 10,
+	[TREASURE_BLOODHERO_DEFAULT]    = 11,
+	[TREASURE_SHELLFISHTRAP_DEFAULT]= 12,
+	[TREASURE_FISHNODE_DEFAULT]     = 13,
+	[TREASURE_FISHWRECK_DEFAULT]    = 14,
+	[TREASURE_FISHELEM_DEFAULT]     = 15,
+	[TREASURE_NIGHTDRAGON_DEFAULT]	= 16,
+	[TREASURE_WHIPPERROOT_DEFAULT]	= 17,
+	[TREASURE_WINDBLOSSOM_DEFAULT]	= 18,
+	[TREASURE_SONGFLOWER_DEFAULT]	= 19,
+};
+
+-- index with localized keys
 Gather_DB_IconIndex = {}; -- type: Dict[GatherTypeIndex, Dict[IconName, IconIndex]]
 Gather_DB_IconIndex[Gatherer_EGatherType.treasure] = {
 	["default"]             = 0,
@@ -236,26 +262,6 @@ Gather_DB_IconIndex[Gatherer_EGatherType.treasure] = {
 	[TREASURE_WHIPPERROOT]	= 17,
 	[TREASURE_WINDBLOSSOM]	= 18,
 	[TREASURE_SONGFLOWER]	= 19,
-	-- english defaults as a fallback
-	[TREASURE_BOX_DEFAULT]          = 1,
-	[TREASURE_CHEST_DEFAULT]        = 2,
-	[TREASURE_CLAM_DEFAULT]         = 3,
-	[TREASURE_CRATE_DEFAULT]        = 4,
-	[TREASURE_BARREL_DEFAULT]       = 5,
-	[TREASURE_CASK_DEFAULT]         = 6,
-	[TREASURE_FOOTLOCKER_DEFAULT]   = 7,
-	[TREASURE_UNGOROSOIL_DEFAULT]   = 8,
-	[TREASURE_BLOODPETAL_DEFAULT]   = 9,
-	[TREASURE_POWERCRYST_DEFAULT]   = 10,
-	[TREASURE_BLOODHERO_DEFAULT]    = 11,
-	[TREASURE_SHELLFISHTRAP_DEFAULT]= 12,
-	[TREASURE_FISHNODE_DEFAULT]     = 13,
-	[TREASURE_FISHWRECK_DEFAULT]    = 14,
-	[TREASURE_FISHELEM_DEFAULT]     = 15,
-	[TREASURE_NIGHTDRAGON_DEFAULT]	= 16,
-	[TREASURE_WHIPPERROOT_DEFAULT]	= 17,
-	[TREASURE_WINDBLOSSOM_DEFAULT]	= 18,
-	[TREASURE_SONGFLOWER_DEFAULT]	= 19,
 };
 
 Gather_DB_IconIndex[Gatherer_EGatherType.herb] = {
