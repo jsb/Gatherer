@@ -6,6 +6,77 @@
 	Processed locales: french (frFR), german (deDE), simplified chinese (zhCN), english (US or GB, default)
 ]]
 
+-- Default implementations to be called as a fallback
+-- ore classes
+ORE_CLASS_VEIN_DEFAULT   ="vein"
+ORE_CLASS_DEPOSIT_DEFAULT ="deposit"
+
+ORE_RTHORIUM_DEFAULT  ="thorium (rich)"
+ORE_DARKIRON_DEFAULT  ="dark iron"
+
+function Gatherer_FindOreType_default(input)
+	local i,j, oreType, oreClass, oreTypeClass;
+
+	if ( string.find(input, "rich") and string.find(input, "thorium") ) then
+		return ORE_RTHORIUM_DEFAULT;
+	end;
+
+	if ( string.find(input, "dark") and string.find(input, "iron") ) then
+		return ORE_DARKIRON_DEFAULT;
+	end
+
+	i,j, oreType, oreClass = string.find(input, "([^ ]+) ([^ ]+)$");
+	if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN_DEFAULT) or (oreClass == ORE_CLASS_DEPOSIT_DEFAULT))) then
+		return oreType;
+	end
+	return;
+end
+
+
+function Gatherer_FindTreasureType_default(in_input)
+	local iconName, input;
+
+	input = string.gsub(in_input, GATHERER_NOTEXT, "")
+
+	if ( string.find(input, TREASURE_UNGOROSOIL_G) or string.find(input, TREASURE_UNGOROSOIL)) then
+		return TREASURE_UNGOROSOIL, TREASURE_UNGOROSOIL;
+	end
+
+	if (string.find(input, TREASURE_POWERCRYST) ) then
+		return TREASURE_POWERCRYST, TREASURE_POWERCRYST;
+	end
+
+	if (string.find(input, TREASURE_BLOODPETAL_G) or string.find(input, TREASURE_BLOODPETAL)) then
+		return TREASURE_BLOODPETAL, TREASURE_BLOODPETAL_G;
+	end
+
+	if (string.find(input, TREASURE_BLOODHERO) ) then
+		return TREASURE_BLOODHERO, TREASURE_BLOODHERO;
+	end
+
+	for iconName in Gather_DB_IconIndex[0] do
+		local index, treasure_regex, i, j, treasType;
+		if ( input == iconName ) then
+			return iconName;
+		end
+
+		if ( string.find(input, iconName) ) then
+			for index, treasure_regex in TREASURE_REGEX do
+				i,j, treasType = string.find(input, treasure_regex);
+				if ( treasType and treasType == iconName ) then
+					return iconName;
+				end
+
+				i,j, _, treasType = string.find(input, treasure_regex);
+				if ( treasType and treasType == iconName ) then
+					return iconName;
+				end
+			end
+		end
+	end
+	return;
+end
+
 if ( GetLocale() == "frFR" ) then
 	-- French localized variables
 	GATHERER_VERSION_WARNING="Nouvelle version de Gatherer d\195\169tect\195\169e, v\195\169rifiez le zone match.";
@@ -151,7 +222,7 @@ if ( GetLocale() == "frFR" ) then
 		if (oreType and oreClass and (oreClass == ORE_CLASS_VEIN or oreClass == ORE_CLASS_DEPOSIT or oreClass == ORE_CLASS_LODE or oreClass == ORE_CLASS_SEAM)) then
 			return oreType;
 		end
-		return;
+		return Gatherer_FindOreType_default(input);
 	end
 
 	function Gatherer_FindTreasureType(in_input)
@@ -351,7 +422,7 @@ elseif ( GetLocale() == "deDE" ) then
 		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
 			return oreType;
 		end
-		return;
+		return Gatherer_FindOreType_default(input);
 	end
 
 	function Gatherer_FindTreasureType(in_input)
@@ -550,7 +621,7 @@ elseif (  GetLocale() == "zhCN"  ) then
 		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
 			return oreType;
 		end
-		return;
+		return Gatherer_FindOreType_default(input);
 	end
 
 	function Gatherer_FindTreasureType(in_input)
@@ -743,7 +814,7 @@ elseif ( GetLocale() == "ruRU" ) then
 		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
 			return oreType;
 		end
-		return;
+		return Gatherer_FindOreType_default(input);
 	end
 
 	function Gatherer_FindTreasureType(input)
@@ -825,8 +896,8 @@ else
 	GATHERER_NOSKILL="Requires"
 
 	-- ore classes
-	ORE_CLASS_VEIN   ="vein"
-	ORE_CLASS_DEPOSIT="deposit"
+	ORE_CLASS_VEIN   =ORE_CLASS_VEIN_DEFAULT
+	ORE_CLASS_DEPOSIT=ORE_CLASS_DEPOSIT_DEFAULT
 
 	-- ore types
 	ORE_COPPER    ="copper"
@@ -837,8 +908,8 @@ else
 	ORE_GOLD      ="gold"
 	ORE_MITHRIL   ="mithril"
 	ORE_THORIUM   ="thorium"
-	ORE_RTHORIUM  ="thorium (rich)"
-	ORE_DARKIRON  ="dark iron"
+	ORE_RTHORIUM  =ORE_RTHORIUM_DEFAULT
+	ORE_DARKIRON  =ORE_DARKIRON_DEFAULT
 
 	-- herb types
 	HERB_ARTHASTEAR        ="arthas' tears"
@@ -915,23 +986,7 @@ else
 		[3] = "([^ ]+) ([^ ]+) ",
 	};
 
-	function Gatherer_FindOreType(input)
-		local i,j, oreType, oreClass, oreTypeClass;
-
-		if ( string.find(input, "rich") and string.find(input, "thorium") ) then
-			return ORE_RTHORIUM;
-		end;
-
-		if ( string.find(input, "dark") and string.find(input, "iron") ) then
-                        return ORE_DARKIRON;
-                end
-
-		i,j, oreType, oreClass = string.find(input, "([^ ]+) ([^ ]+)$");
-		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
-			return oreType;
-		end
-		return;
-	end
+	Gatherer_FindOreType = Gatherer_FindOreType_default;
 
 	function Gatherer_FindTreasureType(in_input)
 		local iconName, input;

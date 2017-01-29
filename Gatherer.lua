@@ -1060,7 +1060,6 @@ function GatherMain_Draw()
 							gatherType = Gatherer_EGatherType.treasure;
 							allowed = Gatherer_GetFilter("treasure");
 						else
-							-- Herb
 							specificType = gatherName;
 							gatherType = Gatherer_EGatherType.herb;
 							allowed = Gatherer_GetFilter("herbs");
@@ -1098,11 +1097,18 @@ function GatherMain_Draw()
 					end
 				end
 
-				if ((allowed == true) and
-					((SETTINGS == nil) or
-					 (SETTINGS.interested == nil) or (idx_count == 0) or SETTINGS.interested[gatherType] == nil or
-					 (SETTINGS.interested[gatherType][specificType] == true or
-					  (SETTINGS.rareOre == 1 and SETTINGS.interested[gatherType][Gather_RareMatch[specificType]])
+				if (
+					(allowed == true)
+					and (
+						(SETTINGS == nil)
+						or (SETTINGS.interested == nil)
+						or (idx_count == 0)
+						or SETTINGS.interested[gatherType] == nil
+						or (SETTINGS.interested[gatherType][specificType] == true
+						or (
+							SETTINGS.rareOre == 1
+							and SETTINGS.interested[gatherType][Gather_RareMatch[specificType]]
+						)
 					 )
 					)
 				) then
