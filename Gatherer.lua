@@ -1007,6 +1007,7 @@ function Gatherer_CreateNoteObject(noteNumber)
 	return button;
 end
 
+local debug_first_icon = true;
 function GatherMain_Draw()
 	local lastUnused = 1000;
 	local maxNotes = 1600;
@@ -1022,30 +1023,30 @@ function GatherMain_Draw()
 		local mapZone = GetCurrentMapZone();
 		if ((mapContinent > 0) and (mapZone > 0) and (GatherItems[mapContinent]) and (GatherItems[mapContinent][mapZone])) then
 			for gatherName, gatherData in GatherItems[mapContinent][mapZone] do
-				local gatherType = "Default";
+				local gatherType = Gatherer_EGatherType.default;
 				local specificType = "";
 				local allowed = true;
 				local minSetSkillLevel = 0;
 				local idx_count=0;
 
 				specificType = Gatherer_FindOreType(gatherName);
-				if (specificType) then -- Ore
-					gatherType = 2;
+				if (specificType) then
+					gatherType = Gatherer_EGatherType.ore;
 					allowed = Gatherer_GetFilter("mining");
 				else
 					specificType = Gatherer_FindTreasureType(gatherName);
 					if (specificType ) then -- Treasure
-						gatherType = 0;
+						gatherType = Gatherer_EGatherType.treasure;
 						allowed = Gatherer_GetFilter("treasure");
 					else
 						specificType = Gatherer_FindFishType(gatherName);
 						if ( specificType ) then -- Treasure Fish
-							gatherType = 0;
+							gatherType = Gatherer_EGatherType.treasure;
 							allowed = Gatherer_GetFilter("treasure");
 						else
 							-- Herb
 							specificType = gatherName;
-							gatherType = 1;
+							gatherType = Gatherer_EGatherType.herb;
 							allowed = Gatherer_GetFilter("herbs");
 						end
 					end
@@ -1062,10 +1063,10 @@ function GatherMain_Draw()
 						end
 					end
 
-					if( gatherType == 2 ) then -- Ore
+					if( gatherType == Gatherer_EGatherType.ore ) then
 						minSetSkillLevel = SETTINGS.minSetOreSkill;
 						if ( not minSetSkillLevel ) then minSetSkillLevel = -1; end
-					elseif ( gatherType == 1 ) then -- Herb
+					elseif ( gatherType == Gatherer_EGatherType.herb  ) then
 						minSetSkillLevel = SETTINGS.minSetHerbSkill;
 						if ( not minSetSkillLevel ) then minSetSkillLevel = -1; end
 					end
@@ -1089,7 +1090,7 @@ function GatherMain_Draw()
 					 )
 					)
 				) then
-					for hPos, gatherInfo in gatherData do
+					for nodeIndex, gatherInfo in gatherData do
 						local convertedGatherType="";
 						local numGatherType, numGatherIcon;
 
@@ -1136,6 +1137,18 @@ function GatherMain_Draw()
 							else
 								gatherType = convertedGatherType;
 							end
+							if debug_first_icon then
+								Gatherer_ChatNotify(
+									'Icon on global map: '..Gatherer_table_to_string({
+										gatherType=gatherType, specificType=specificType,
+										convertedGatherType=convertedGatherType
+									})..'\nIcons: '..Gatherer_table_to_string(
+										Gather_IconSet["iconic"][convertedGatherType]
+									),
+									Gatherer_ENotificationType.debug
+								);
+								debug_first_icon = false;
+							end
 							if ( type(specificType) == "number" ) then
 								specificType = Gatherer_GetDB_IconIndex(specificType, convertedGatherType);
 							end
@@ -1144,7 +1157,7 @@ function GatherMain_Draw()
 								texture = Gather_IconSet["iconic"][gatherType]["default"];
 							end
 
-							if ( gatherInfo.gtype == "Default" or gatherInfo.gtype == 3 ) then
+							if ( gatherInfo.gtype == "Default" or gatherInfo.gtype == Gatherer_EGatherType.default ) then
 								texture = Gather_IconSet["iconic"]["Default"]["default"];
 							end
 
@@ -1165,7 +1178,7 @@ function GatherMain_Draw()
 							mainNote.continent = mapContinent;
 							mainNote.zoneIndex = mapZone;
 							mainNote.gatherName = gatherName;
-							mainNote.localIndex = hPos;
+							mainNote.localIndex = nodeIndex;
 							mainNote.gatherType = numGatherType;
 							mainNote.gatherIcon = numGatherIcon;
 

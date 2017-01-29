@@ -3,10 +3,17 @@
 
 -- Gatherer_EGatherType = {treasure=0, herb=1, ore=2}
 Gatherer_EGatherType = {
+	-- code constants
+	treasure = 0,
+	herb = 1,
+	ore = 2,
+	default = 3,
+	-- display
 	[0]          = "Treasure",
 	[1]          = "Herb",
 	[2]          = "Ore",
 	[3]          = "Default",
+	-- backward compatibility
 	["Treasure"] = 0,
 	["Herb"]     = 1,
 	["Ore"]      = 2,
