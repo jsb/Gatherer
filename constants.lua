@@ -19,10 +19,12 @@ Gatherer_EGatherType = {
 	["Ore"]      = 2,
 	["Default"]  = 3,
 };
+-- GatherTypeName = Text
+-- GatherTypeIndex = int
+-- GatherType = Union[GatherTypeName, GatherTypeIndex]
 
-function Gatherer_EGatherType_ensureIndex(gatherType)
-	-- type: (Gatherer_EGatherType) -> gatherTypeIndex
-	local gatherTypeIndex
+function Gatherer_EGatherType_ensure_index(gatherType)
+	-- type: (Union[Gatherer_EGatherType, GatherTypeName]) -> Gatherer_EGatherType
 	if type(gatherType) == "string" then
 		return Gatherer_EGatherType[gatherType];
 	end
@@ -39,7 +41,10 @@ end
 -- IconIndex = int
 -- Icon = Union[IconName, IconIndex]
 
+-- In the ideal world gatherName == iconName
+-- and we don't need to store icon index for every node at all.
 -- GatherName = Text
+
 -- NodeInfo = Dict[Text, Union[int,float]]
 
 -- GathererDb = Dict[Continent, Dict[Zone, Dict[GatherName, List[NodeInfo]]]]

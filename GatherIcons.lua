@@ -155,7 +155,7 @@ Gather_SkillLevel = {
 -- Match tables for shorter DB format
 -- converting IconIndex to IconName and vice versa
 function Gatherer_GetDB_IconIndex(iconIndex, gatherType)
-	-- type: (Icon, Optional[Gatherer_EGatherType]) -> Tuple[Icon, Optional[Gatherer_EGatherType]]
+	-- type: (Icon, Optional[GatherType]) -> Tuple[Icon, Optional[GatherType]]
 	local iconName, gatherTypeIndex;
 
 	-- if gatherType wasn't set while icon was searched by name
@@ -170,7 +170,7 @@ function Gatherer_GetDB_IconIndex(iconIndex, gatherType)
 		end
 	end
 
-	gatherTypeIndex = Gatherer_EGatherType_ensureIndex(gatherType)
+	gatherTypeIndex = Gatherer_EGatherType_ensure_index(gatherType)
 	-- when gatherType isn't set and type(iconIndex) ~= 'string'
 	-- it'll loudly fail since gatherTypeIndex would be nil
 	for iconName in Gather_DB_IconIndex[gatherTypeIndex] do

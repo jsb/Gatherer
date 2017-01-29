@@ -778,6 +778,7 @@ function Gatherer_TimeCheck(timeDelta)
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
+local debug_first_minimap_icon = true;
 function Gatherer_OnUpdate(timeDelta, force)
 	if (not GATHERER_LOADED) then
 		Gatherer_Print("Gatherer not loaded");
@@ -897,18 +898,21 @@ function Gatherer_OnUpdate(timeDelta, force)
 					alpha = 1.0 - (math.min(1.0, math.max(0.0, distRatio)) * fadePerc);
 				end
 
-				local textureType = closestGather.item.gtype;
-				local textureIcon = closestGather.item.icon;
-
-				if ( type(textureType) == "number" ) then
-					textureType = Gatherer_EGatherType[textureType];
+				local gatherType = closestGather.item.gtype;
+				local gatherTypeName = gatherType;
+				if ( type(gatherType) == "number" ) then
+					gatherTypeName = Gatherer_EGatherType[gatherType];
 				end
+				assert(type(gatherTypeName) == 'string')
 
-				if ( type(textureIcon) == "number" ) then
-					textureIcon = Gatherer_GetDB_IconIndex(textureIcon, textureType);
+				local iconIndex = closestGather.item.icon;
+				local iconName = iconIndex;
+				if ( type(iconIndex) == "number" ) then
+					iconName = Gatherer_GetDB_IconIndex(iconIndex, gatherTypeName);
 				end
+				if (not iconName) then iconName = "default"; end;
+				assert(type(iconName) == 'string')
 
-				if (not textureIcon) then textureIcon = "default"; end;
 				if (SETTINGS.iconSet == "iconshade" )
 				then
 					iconSet="iconic";
@@ -917,11 +921,23 @@ function Gatherer_OnUpdate(timeDelta, force)
 						alpha=0.4;
 					end
 				end
+				if debug_first_minimap_icon then
+					Gatherer_ChatNotify(
+						'Icon on mini map: '..Gatherer_table_to_string({
+							gatherType=gatherType, specificType=iconName,
+							gatherTypeName=gatherTypeName
+						})..'\nIcons: '..Gatherer_table_to_string(
+							Gather_IconSet["iconic"][gatherTypeName]
+						),
+						Gatherer_ENotificationType.debug
+					);
+					debug_first_minimap_icon = false;
+				end
 				if (not Gather_IconSet[iconSet]) then iconSet = "shaded"; end
-				if (not Gather_IconSet[iconSet][textureType]) then textureType = "Default"; end
-				local selectedTexture = Gather_IconSet[iconSet][textureType][textureIcon];
+				if (not Gather_IconSet[iconSet][gatherTypeName]) then gatherTypeName = "Default"; end
+				local selectedTexture = Gather_IconSet[iconSet][gatherTypeName][iconName];
 				if (not selectedTexture) then
-					selectedTexture = Gather_IconSet[iconSet][textureType]["default"];
+					selectedTexture = Gather_IconSet[iconSet][gatherTypeName]["default"];
 				end
 
 				gatherNoteTexture:SetTexture(selectedTexture);
@@ -1022,7 +1038,7 @@ function GatherMain_Draw()
 		local mapContinent = GetCurrentMapContinent();
 		local mapZone = GetCurrentMapZone();
 		if ((mapContinent > 0) and (mapZone > 0) and (GatherItems[mapContinent]) and (GatherItems[mapContinent][mapZone])) then
-			for gatherName, gatherData in GatherItems[mapContinent][mapZone] do
+			for gatherName, gatherNodes in GatherItems[mapContinent][mapZone] do
 				local gatherType = Gatherer_EGatherType.default;
 				local specificType = "";
 				local allowed = true;
@@ -1090,9 +1106,8 @@ function GatherMain_Draw()
 					 )
 					)
 				) then
-					for nodeIndex, gatherInfo in gatherData do
-						local convertedGatherType="";
-						local numGatherType, numGatherIcon;
+					for nodeIndex, nodeInfo in gatherNodes do
+						local gatherTypeName ="";
 
 						if ( lastUnused > 1000 and lastUnused < maxNotes and mod(lastUnused, 100) == 0 ) then
 							local overlayFrameNumber = math.floor((lastUnused - 1000 )/100 + 1);
@@ -1102,12 +1117,12 @@ function GatherMain_Draw()
 							GathererMapOverlayFrame1:Show();
 						end
 
-						if ((gatherInfo.x) and (gatherInfo.y) and (gatherInfo.x>0) and (gatherInfo.y>0) and (lastUnused <= maxNotes)) then
+						if ((nodeInfo.x) and (nodeInfo.y) and (nodeInfo.x>0) and (nodeInfo.y>0) and (lastUnused <= maxNotes)) then
 							local mainNote = Gatherer_CreateNoteObject(lastUnused);
 
 							local mnX,mnY;
-							mnX = gatherInfo.x / 100 * Gatherer_WorldMapDetailFrameWidth;
-							mnY = -gatherInfo.y / 100 * Gatherer_WorldMapDetailFrameHeight;
+							mnX = nodeInfo.x / 100 * Gatherer_WorldMapDetailFrameWidth;
+							mnY = -nodeInfo.y / 100 * Gatherer_WorldMapDetailFrameHeight;
 
 							if ( SETTINGS and SETTINGS.IconAlpha ~= nil ) then
 								mainNote:SetAlpha(SETTINGS.IconAlpha / 100);
@@ -1124,40 +1139,56 @@ function GatherMain_Draw()
 								mainNote.toolTip = Gatherer_GetMenuName(specificType);
 							end
 
+							local gatherTypeIndex;
 							if ( type(gatherType) == "number" ) then
-								convertedGatherType = Gatherer_EGatherType[gatherType];
-								numGatherType = gatherType
+								gatherTypeName = Gatherer_EGatherType[gatherType];
+								gatherTypeIndex = gatherType
 							else
-								convertedGatherType = gatherType;
-								numGatherType = Gatherer_EGatherType[gatherType];
+								gatherTypeName = gatherType;
+								gatherTypeIndex = Gatherer_EGatherType[gatherType];
 							end
 
-							if (not Gather_IconSet["iconic"][convertedGatherType]) then
+							if (not Gather_IconSet["iconic"][gatherTypeName]) then
 								gatherType = "Default";
 							else
-								gatherType = convertedGatherType;
+								gatherType = gatherTypeName;
 							end
 							if debug_first_icon then
 								Gatherer_ChatNotify(
 									'Icon on global map: '..Gatherer_table_to_string({
 										gatherType=gatherType, specificType=specificType,
-										convertedGatherType=convertedGatherType
+										gatherTypeName= gatherTypeName
 									})..'\nIcons: '..Gatherer_table_to_string(
-										Gather_IconSet["iconic"][convertedGatherType]
+										Gather_IconSet["iconic"][gatherTypeName]
 									),
 									Gatherer_ENotificationType.debug
 								);
 								debug_first_icon = false;
 							end
 							if ( type(specificType) == "number" ) then
-								specificType = Gatherer_GetDB_IconIndex(specificType, convertedGatherType);
+								specificType = Gatherer_GetDB_IconIndex(specificType, gatherTypeName);
 							end
-							local texture = Gather_IconSet["iconic"][convertedGatherType][specificType];
+							-- To compute specificType (iconName actually) once and for all
+							-- is a nice idea. But not in our cruel world
+							-- where ruWow does a real mess with the locale.
+							-- That's why we have to rely on gatherInfo.icon here.
+							-- It's an IconIndex thus it's locale independent.
+							local iconIndex;
+							if (type(nodeInfo.icon) == "string" ) then
+								-- This is a strange buggy operation
+								-- since it returns table instead of int.
+								iconIndex = Gather_DB_IconIndex[gatherTypeIndex];
+							else
+								iconIndex = nodeInfo.icon;
+							end
+							assert(type(iconIndex) == 'number')
+							local iconName = Gatherer_GetDB_IconIndex(nodeInfo.icon, gatherType);
+							local texture = Gather_IconSet["iconic"][gatherTypeName][iconName];
 							if (not texture) then
 								texture = Gather_IconSet["iconic"][gatherType]["default"];
 							end
 
-							if ( gatherInfo.gtype == "Default" or gatherInfo.gtype == Gatherer_EGatherType.default ) then
+							if ( nodeInfo.gtype == "Default" or nodeInfo.gtype == Gatherer_EGatherType.default ) then
 								texture = Gather_IconSet["iconic"]["Default"]["default"];
 							end
 
@@ -1169,18 +1200,13 @@ function GatherMain_Draw()
 							end
 
 							-- setting value for editing
-							if (type(gatherInfo.icon) == "string" ) then
-								numGatherIcon = Gather_DB_IconIndex[numGatherType];
-							else
-								numGatherIcon = gatherInfo.icon;
-							end
 
 							mainNote.continent = mapContinent;
 							mainNote.zoneIndex = mapZone;
 							mainNote.gatherName = gatherName;
 							mainNote.localIndex = nodeIndex;
-							mainNote.gatherType = numGatherType;
-							mainNote.gatherIcon = numGatherIcon;
+							mainNote.gatherType = gatherTypeIndex;
+							mainNote.gatherIcon = iconIndex;
 
 							if ( not mainNote:IsShown() ) then
 								mainNote:Show();
