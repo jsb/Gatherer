@@ -166,6 +166,7 @@ function Gatherer_Command(command)
 		Gatherer_ChatPrint("  |cffffffff/gather filterrec (herbs|mining|treasure)|r - link display filter to recording for selected gathering type");
 		Gatherer_ChatPrint("  |cffffffff/gather debug ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.debug].."]|r - show/hide debug messages");
 		Gatherer_ChatPrint("  |cffffffff/gather p2p ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.p2p].."]|r - enable/disable peer-to-peer functions");
+		Gatherer_ChatPrint("  |cffffffff/gather locale <locale>|r |cff2040ff["..SETTINGS.locale.."]|r - override the locale, e.g. frFR. Default is set by the client. To reset back to it give no parameter.");
 	elseif (cmd == "options" ) then
 		if ( GathererUI_DialogFrame:IsVisible() ) then
 			GathererUI_HideOptions();
@@ -188,6 +189,12 @@ function Gatherer_Command(command)
 			SETTINGS.p2p = false;
 			Gatherer_ChatPrint("Peer-to-peer functions disabled");
 		end
+	elseif (cmd == "locale") then
+		SETTINGS.locale = param
+		if (not param or param == "") then
+			SETTINGS.locale = GetLocale();
+		end
+		Gatherer_apply_locale(SETTINGS.locale);
 	elseif (cmd == "report" ) then
 		showGathererInfo(1);
 	elseif (cmd == "search" ) then
@@ -500,11 +507,13 @@ function Gatherer_OnEvent(event)
 
 		if (arg1 and string.lower(arg1) == "gatherer") then
 			Gatherer_Configuration.Load();
+			Gatherer_apply_locale(Gatherer_Settings.locale);
 			GATHERER_LOADED = true;
 			Gatherer_sanitizeDatabase(GatherItems)
 			Gatherer_OnUpdate(0, true);
 
 			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
+			Gatherer_Print("Locale: "..Gatherer_Settings.locale);
 
 			if (Gatherer_Settings.useMainmap == true) then
 				Gatherer_WorldMapDisplay:SetText("Hide Items");
