@@ -433,7 +433,7 @@ function Gatherer_OnEvent(event)
 			Gatherer_currentNode = GameTooltipTextLeft1:GetText();
 			Gatherer_currentAction = arg1;
 
-			Gatherer_Debug("Current node: "..Gatherer_currentNode);
+			Gatherer_Debug("Current node: "..(Gatherer_currentNode or "nil"));
 			Gatherer_RecordFlag=1;
 		end
 	elseif ( event == "SPELLCAST_STOP" and Gatherer_RecordFlag == 1 ) then
