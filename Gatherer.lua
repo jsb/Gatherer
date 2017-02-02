@@ -1,7 +1,7 @@
 -- Gatherer
 -- Written by Chandora
 
-GATHERER_VERSION="1.0.0";
+GATHERER_VERSION="1.0.1";
 
 --
 -- Look, seriously a full half of this code is from MapNotes.
@@ -166,6 +166,7 @@ function Gatherer_Command(command)
 		Gatherer_ChatPrint("  |cffffffff/gather filterrec (herbs|mining|treasure)|r - link display filter to recording for selected gathering type");
 		Gatherer_ChatPrint("  |cffffffff/gather debug ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.debug].."]|r - show/hide debug messages");
 		Gatherer_ChatPrint("  |cffffffff/gather p2p ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.p2p].."]|r - enable/disable peer-to-peer functions");
+		Gatherer_ChatPrint("  |cffffffff/gather locale <locale>|r |cff2040ff["..SETTINGS.locale.."]|r - override the locale, e.g. frFR. Default is set by the client. To reset back to it give no parameter.");
 	elseif (cmd == "options" ) then
 		if ( GathererUI_DialogFrame:IsVisible() ) then
 			GathererUI_HideOptions();
@@ -188,6 +189,12 @@ function Gatherer_Command(command)
 			SETTINGS.p2p = false;
 			Gatherer_ChatPrint("Peer-to-peer functions disabled");
 		end
+	elseif (cmd == "locale") then
+		SETTINGS.locale = param
+		if (not param or param == "") then
+			SETTINGS.locale = GetLocale();
+		end
+		Gatherer_apply_locale(SETTINGS.locale);
 	elseif (cmd == "report" ) then
 		showGathererInfo(1);
 	elseif (cmd == "search" ) then
@@ -500,11 +507,13 @@ function Gatherer_OnEvent(event)
 
 		if (arg1 and string.lower(arg1) == "gatherer") then
 			Gatherer_Configuration.Load();
+			Gatherer_apply_locale(Gatherer_Settings.locale);
 			GATHERER_LOADED = true;
 			Gatherer_sanitizeDatabase(GatherItems)
 			Gatherer_OnUpdate(0, true);
 
 			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
+			Gatherer_Print("Locale: "..Gatherer_Settings.locale);
 
 			if (Gatherer_Settings.useMainmap == true) then
 				Gatherer_WorldMapDisplay:SetText("Hide Items");
@@ -712,7 +721,8 @@ local function selectRandomGather()
 	end
 
 	local eventType = 1; -- EGatherEventType.no_skill
-	-- values don't matter, I just hate lua
+	-- Values don't matter, I just hate lua
+	-- for this `if in` pattern.
 	local FISHING_GATHERS = {['floating wreckage']=0, ['school']=''};
 	if FISHING_GATHERS[randomGather] then
 		eventType = 2; -- EGatherEventType.fishing
@@ -778,6 +788,7 @@ function Gatherer_TimeCheck(timeDelta)
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
+local debug_first_minimap_icon = true;
 function Gatherer_OnUpdate(timeDelta, force)
 	if (not GATHERER_LOADED) then
 		Gatherer_Print("Gatherer not loaded");
@@ -866,92 +877,102 @@ function Gatherer_OnUpdate(timeDelta, force)
 			local closestPos, closestGather, closestID;
 			local currentPos = 1;
 			for closestPos, closestGather in ClosestGathers.items do
-				local skip_node = 0;
+				if ( currentPos > SETTINGS.number ) then break; end
 
-				if ( currentPos > SETTINGS.number ) then skip_node =1; end
+				-- need to position and label the corresponding button
+				local gatherNote = getglobal("GatherNote"..currentPos);
+				local gatherNoteTexture = getglobal("GatherNote"..currentPos.."Texture");
 
-				if ( skip_node == 0 ) then
-					-- need to position and label the corresponding button
-					local gatherNote = getglobal("GatherNote"..currentPos);
-					local gatherNoteTexture = getglobal("GatherNote"..currentPos.."Texture");
+				local itemDeltaX = closestGather.deltax+playerDeltaX;
+				local itemDeltaY = closestGather.deltay+playerDeltaY;
+				local offsX, offsY, gDist = Gatherer_MiniMapPos(itemDeltaX, itemDeltaY, ClosestGathers.scaleX, ClosestGathers.scaleY);
+				gatherNote:SetPoint("CENTER", Minimap, "CENTER", offsX, -offsY);
 
-					local itemDeltaX = closestGather.deltax+playerDeltaX;
-					local itemDeltaY = closestGather.deltay+playerDeltaY;
-					local offsX, offsY, gDist = Gatherer_MiniMapPos(itemDeltaX, itemDeltaY, ClosestGathers.scaleX, ClosestGathers.scaleY);
-					gatherNote:SetPoint("CENTER", Minimap, "CENTER", offsX, -offsY);
+				local iconSet = SETTINGS.iconSet;
+				local iDist = SETTINGS.miniIconDist;
+				if (not iconSet) then iconSet = "shaded"; end
+				if (not iDist) then iDist = 38; end
 
-					local iconSet = SETTINGS.iconSet;
-					local iDist = SETTINGS.miniIconDist;
-					if (not iconSet) then iconSet = "shaded"; end
-					if (not iDist) then iDist = 38; end
+				local _, _, sDist = Gatherer_MiniMapPos(iDist/10000, 0, ClosestGathers.scaleX, ClosestGathers.scaleY);
 
-					local _, _, sDist = Gatherer_MiniMapPos(iDist/10000, 0, ClosestGathers.scaleX, ClosestGathers.scaleY);
+				if ((iDist > 0) and (gDist > (math.floor(sDist)-1))) then
+					iconSet = "iconic";
+				end
 
-					if ((iDist > 0) and (gDist > (math.floor(sDist)-1))) then
-						iconSet = "iconic";
-					end
+				local fadeDist = SETTINGS.fadeDist / 1000;
+				local fadePerc = SETTINGS.fadePerc / 100;
+				local alpha = 1.0;
+				local objDist = Gatherer_Pythag(itemDeltaX, itemDeltaY);
+				if ((fadeDist > 0) and (fadePerc > 0)) then
+					local distRatio = objDist / fadeDist ;
+					alpha = 1.0 - (math.min(1.0, math.max(0.0, distRatio)) * fadePerc);
+				end
 
-					local fadeDist = SETTINGS.fadeDist / 1000;
-					local fadePerc = SETTINGS.fadePerc / 100;
-					local alpha = 1.0;
-					local objDist = Gatherer_Pythag(itemDeltaX, itemDeltaY);
-					if ((fadeDist > 0) and (fadePerc > 0)) then
-						local distRatio = objDist / fadeDist ;
-						alpha = 1.0 - (math.min(1.0, math.max(0.0, distRatio)) * fadePerc);
-					end
+				local gatherType = closestGather.item.gtype;
+				local gatherTypeName = gatherType;
+				if ( type(gatherType) == "number" ) then
+					gatherTypeName = Gatherer_EGatherType[gatherType];
+				end
+				assert(type(gatherTypeName) == 'string')
 
-					local textureType = closestGather.item.gtype;
-					local textureIcon = closestGather.item.icon;
+				local iconIndex = closestGather.item.icon;
+				local iconName = iconIndex;
+				if ( type(iconIndex) == "number" ) then
+					iconName = Gatherer_GetDB_IconIndex(iconIndex, gatherTypeName);
+				end
+				if (not iconName) then iconName = "default"; end;
+				assert(type(iconName) == 'string')
 
-					if ( type(textureType) == "number" ) then
-						textureType = Gatherer_EGatherType[textureType];
-					end
-
-					if ( type(textureIcon) == "number" ) then
-						textureIcon = Gatherer_GetDB_IconIndex(textureIcon, textureType);
-					end
-
-					if (not textureIcon) then textureIcon = "default"; end;
-					if (SETTINGS.iconSet == "iconshade" )
+				if (SETTINGS.iconSet == "iconshade" )
+				then
+					iconSet="iconic";
+					if ( gDist < (math.floor(sDist)-1) )
 					then
-						iconSet="iconic";
-						if ( gDist < (math.floor(sDist)-1) )
-						then
-							alpha=0.4;
-						end
+						alpha=0.4;
 					end
-					if (not Gather_IconSet[iconSet]) then iconSet = "shaded"; end
-					if (not Gather_IconSet[iconSet][textureType]) then textureType = "Default"; end
-					local selectedTexture = Gather_IconSet[iconSet][textureType][textureIcon];
-					if (not selectedTexture) then
-						selectedTexture = Gather_IconSet[iconSet][textureType]["default"];
-					end
+				end
+				if debug_first_minimap_icon then
+					Gatherer_ChatNotify(
+						'Icon on mini map: '..Gatherer_table_to_string({
+							gatherType=gatherType, specificType=iconName,
+							gatherTypeName=gatherTypeName
+						})..'\nIcons: '..Gatherer_table_to_string(
+							Gather_IconSet["iconic"][gatherTypeName]
+						),
+						Gatherer_ENotificationType.debug
+					);
+					debug_first_minimap_icon = false;
+				end
+				if (not Gather_IconSet[iconSet]) then iconSet = "shaded"; end
+				if (not Gather_IconSet[iconSet][gatherTypeName]) then gatherTypeName = "Default"; end
+				local selectedTexture = Gather_IconSet[iconSet][gatherTypeName][iconName];
+				if (not selectedTexture) then
+					selectedTexture = Gather_IconSet[iconSet][gatherTypeName]["default"];
+				end
 
-					gatherNoteTexture:SetTexture(selectedTexture);
-					gatherNote:SetFrameLevel(MiniMapTrackingFrame:GetFrameLevel());
-					gatherNote:SetAlpha(alpha);
+				gatherNoteTexture:SetTexture(selectedTexture);
+				gatherNote:SetFrameLevel(MiniMapTrackingFrame:GetFrameLevel());
+				gatherNote:SetAlpha(alpha);
 
-					-- Added to allow hiding if under min distance
-					if ( SETTINGS.NoIconOnMinDist ~= nil and SETTINGS.NoIconOnMinDist == 1 ) then
-						if ( gDist < (math.floor(sDist)-1) ) then
-							gatherNote:Hide();
-						else
-							gatherNote:Show();
-						end
-					elseif ( (not SETTINGS.NoIconOnMinDist or SETTINGS.NoIconOnMinDist == 0) and SETTINGS.alphaUnderMinIcon and gDist < (math.floor(sDist)-1) ) then
-						if ( SETTINGS.iconSet and SETTINGS.iconSet ~= "iconshade" ) then
-							gatherNote:SetAlpha(SETTINGS.alphaUnderMinIcon / 100);
-						end
-						gatherNote:Show();
+				-- Added to allow hiding if under min distance
+				if ( SETTINGS.NoIconOnMinDist ~= nil and SETTINGS.NoIconOnMinDist == 1 ) then
+					if ( gDist < (math.floor(sDist)-1) ) then
+						gatherNote:Hide();
 					else
 						gatherNote:Show();
 					end
-
-					if (currentPos > maxPos) then maxPos = currentPos; end
-
-					currentPos = currentPos + 1;
+				elseif ( (not SETTINGS.NoIconOnMinDist or SETTINGS.NoIconOnMinDist == 0) and SETTINGS.alphaUnderMinIcon and gDist < (math.floor(sDist)-1) ) then
+					if ( SETTINGS.iconSet and SETTINGS.iconSet ~= "iconshade" ) then
+						gatherNote:SetAlpha(SETTINGS.alphaUnderMinIcon / 100);
+					end
+					gatherNote:Show();
+				else
+					gatherNote:Show();
 				end
-				skip_node = 0;
+
+				if (currentPos > maxPos) then maxPos = currentPos; end
+
+				currentPos = currentPos + 1;
 			end
 		end
 
@@ -1012,6 +1033,7 @@ function Gatherer_CreateNoteObject(noteNumber)
 	return button;
 end
 
+local debug_first_icon = true;
 function GatherMain_Draw()
 	local lastUnused = 1000;
 	local maxNotes = 1600;
@@ -1026,31 +1048,32 @@ function GatherMain_Draw()
 		local mapContinent = GetCurrentMapContinent();
 		local mapZone = GetCurrentMapZone();
 		if ((mapContinent > 0) and (mapZone > 0) and (GatherItems[mapContinent]) and (GatherItems[mapContinent][mapZone])) then
-			for gatherName, gatherData in GatherItems[mapContinent][mapZone] do
-				local gatherType = "Default";
+			for gatherName, gatherNodes in GatherItems[mapContinent][mapZone] do
+				local gatherType = Gatherer_EGatherType.default;
 				local specificType = "";
 				local allowed = true;
 				local minSetSkillLevel = 0;
 				local idx_count=0;
 
 				specificType = Gatherer_FindOreType(gatherName);
-				if (specificType) then -- Ore
-					gatherType = 2;
+				if (specificType) then
+					gatherType = Gatherer_EGatherType.ore;
 					allowed = Gatherer_GetFilter("mining");
 				else
 					specificType = Gatherer_FindTreasureType(gatherName);
 					if (specificType ) then -- Treasure
-						gatherType = 0;
+						gatherType = Gatherer_EGatherType.treasure;
 						allowed = Gatherer_GetFilter("treasure");
 					else
+						-- fishTooltip is empty here!
+						-- very unlikely this branch ever works
 						specificType = Gatherer_FindFishType(gatherName);
 						if ( specificType ) then -- Treasure Fish
-							gatherType = 0;
+							gatherType = Gatherer_EGatherType.treasure;
 							allowed = Gatherer_GetFilter("treasure");
 						else
-							-- Herb
 							specificType = gatherName;
-							gatherType = 1;
+							gatherType = Gatherer_EGatherType.herb;
 							allowed = Gatherer_GetFilter("herbs");
 						end
 					end
@@ -1067,10 +1090,10 @@ function GatherMain_Draw()
 						end
 					end
 
-					if( gatherType == 2 ) then -- Ore
+					if( gatherType == Gatherer_EGatherType.ore ) then
 						minSetSkillLevel = SETTINGS.minSetOreSkill;
 						if ( not minSetSkillLevel ) then minSetSkillLevel = -1; end
-					elseif ( gatherType == 1 ) then -- Herb
+					elseif ( gatherType == Gatherer_EGatherType.herb  ) then
 						minSetSkillLevel = SETTINGS.minSetHerbSkill;
 						if ( not minSetSkillLevel ) then minSetSkillLevel = -1; end
 					end
@@ -1086,17 +1109,23 @@ function GatherMain_Draw()
 					end
 				end
 
-				if ((allowed == true) and
-					((SETTINGS == nil) or
-					 (SETTINGS.interested == nil) or (idx_count == 0) or SETTINGS.interested[gatherType] == nil or
-					 (SETTINGS.interested[gatherType][specificType] == true or
-					  (SETTINGS.rareOre == 1 and SETTINGS.interested[gatherType][Gather_RareMatch[specificType]])
+				if (
+					(allowed == true)
+					and (
+						(SETTINGS == nil)
+						or (SETTINGS.interested == nil)
+						or (idx_count == 0)
+						or SETTINGS.interested[gatherType] == nil
+						or (SETTINGS.interested[gatherType][specificType] == true
+						or (
+							SETTINGS.rareOre == 1
+							and SETTINGS.interested[gatherType][Gather_RareMatch[specificType]]
+						)
 					 )
 					)
 				) then
-					for hPos, gatherInfo in gatherData do
-						local convertedGatherType="";
-						local numGatherType, numGatherIcon;
+					for nodeIndex, nodeInfo in gatherNodes do
+						local gatherTypeName ="";
 
 						if ( lastUnused > 1000 and lastUnused < maxNotes and mod(lastUnused, 100) == 0 ) then
 							local overlayFrameNumber = math.floor((lastUnused - 1000 )/100 + 1);
@@ -1106,12 +1135,12 @@ function GatherMain_Draw()
 							GathererMapOverlayFrame1:Show();
 						end
 
-						if ((gatherInfo.x) and (gatherInfo.y) and (gatherInfo.x>0) and (gatherInfo.y>0) and (lastUnused <= maxNotes)) then
+						if ((nodeInfo.x) and (nodeInfo.y) and (nodeInfo.x>0) and (nodeInfo.y>0) and (lastUnused <= maxNotes)) then
 							local mainNote = Gatherer_CreateNoteObject(lastUnused);
 
 							local mnX,mnY;
-							mnX = gatherInfo.x / 100 * Gatherer_WorldMapDetailFrameWidth;
-							mnY = -gatherInfo.y / 100 * Gatherer_WorldMapDetailFrameHeight;
+							mnX = nodeInfo.x / 100 * Gatherer_WorldMapDetailFrameWidth;
+							mnY = -nodeInfo.y / 100 * Gatherer_WorldMapDetailFrameHeight;
 
 							if ( SETTINGS and SETTINGS.IconAlpha ~= nil ) then
 								mainNote:SetAlpha(SETTINGS.IconAlpha / 100);
@@ -1128,28 +1157,57 @@ function GatherMain_Draw()
 								mainNote.toolTip = Gatherer_GetMenuName(specificType);
 							end
 
+							local gatherTypeIndex;
 							if ( type(gatherType) == "number" ) then
-								convertedGatherType = Gatherer_EGatherType[gatherType];
-								numGatherType = gatherType
+								gatherTypeName = Gatherer_EGatherType[gatherType];
+								gatherTypeIndex = gatherType
 							else
-								convertedGatherType = gatherType;
-								numGatherType = Gatherer_EGatherType[gatherType];
+								gatherTypeName = gatherType;
+								gatherTypeIndex = Gatherer_EGatherType[gatherType];
 							end
 
-							if (not Gather_IconSet["iconic"][convertedGatherType]) then
+							if (not Gather_IconSet["iconic"][gatherTypeName]) then
 								gatherType = "Default";
 							else
-								gatherType = convertedGatherType;
+								gatherType = gatherTypeName;
 							end
 							if ( type(specificType) == "number" ) then
-								specificType = Gatherer_GetDB_IconIndex(specificType, convertedGatherType);
+								specificType = Gatherer_GetDB_IconIndex(specificType, gatherTypeName);
 							end
-							local texture = Gather_IconSet["iconic"][convertedGatherType][specificType];
+							-- To compute specificType (iconName actually) once and for all
+							-- is a nice idea. But not in our cruel world
+							-- where ruWow does a real mess with the locale.
+							-- That's why we have to rely on gatherInfo.icon here.
+							-- It's an IconIndex thus it's locale independent.
+							local iconIndex;
+							if (type(nodeInfo.icon) == "string" ) then
+								-- This is a strange buggy operation
+								-- since it returns table instead of int.
+								iconIndex = Gather_DB_IconIndex[gatherTypeIndex];
+							else
+								iconIndex = nodeInfo.icon;
+							end
+							assert(type(iconIndex) == 'number')
+							local iconName = Gatherer_GetDB_IconIndex(nodeInfo.icon, gatherType);
+							if debug_first_icon and gatherName == 'school' then
+								Gatherer_ChatNotify(
+									'Icon on global map: '..Gatherer_table_to_string({
+										gatherType=gatherType, specificType=specificType,
+										gatherTypeName= gatherTypeName,
+										iconIndex=iconIndex, iconName=iconName,
+									})..'\nIcons: '..Gatherer_table_to_string(
+										Gather_IconSet["iconic"][gatherTypeName]
+									),
+									Gatherer_ENotificationType.debug
+								);
+								debug_first_icon = false;
+							end
+							local texture = Gather_IconSet["iconic"][gatherTypeName][iconName];
 							if (not texture) then
 								texture = Gather_IconSet["iconic"][gatherType]["default"];
 							end
 
-							if ( gatherInfo.gtype == "Default" or gatherInfo.gtype == 3 ) then
+							if ( nodeInfo.gtype == "Default" or nodeInfo.gtype == Gatherer_EGatherType.default ) then
 								texture = Gather_IconSet["iconic"]["Default"]["default"];
 							end
 
@@ -1161,18 +1219,13 @@ function GatherMain_Draw()
 							end
 
 							-- setting value for editing
-							if (type(gatherInfo.icon) == "string" ) then
-								numGatherIcon = Gather_DB_IconIndex[numGatherType];
-							else
-								numGatherIcon = gatherInfo.icon;
-							end
 
 							mainNote.continent = mapContinent;
 							mainNote.zoneIndex = mapZone;
 							mainNote.gatherName = gatherName;
-							mainNote.localIndex = hPos;
-							mainNote.gatherType = numGatherType;
-							mainNote.gatherIcon = numGatherIcon;
+							mainNote.localIndex = nodeIndex;
+							mainNote.gatherType = gatherTypeIndex;
+							mainNote.gatherIcon = iconIndex;
 
 							if ( not mainNote:IsShown() ) then
 								mainNote:Show();

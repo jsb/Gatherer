@@ -69,10 +69,12 @@ Default_Settings = {
 	["debug"] = false,
 
 	['p2p'] = true,
+	['locale'] = GetLocale(),
 }
 
 --set per gather type defaults
-for gatherType, nodeTypes in pairs(Gather_DB_IconIndex) do
+-- fixme: there must be no settings depending on a locale
+for gatherType, nodeTypes in pairs(Gather_DB_IconIndex_default) do
 	Default_Settings.filterRecording[gatherType] = false;
 	Default_Settings.filters[gatherType] = "auto";
 
