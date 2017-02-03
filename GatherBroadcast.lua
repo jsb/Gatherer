@@ -135,7 +135,10 @@ function Gatherer_ReceiveBroadcast(message)
 				Gatherer_ENotificationType.receiving
 			)
         end
-        local newNodeFound = Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+        local newNodeFound, insertedIndex = Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, false);
+		if not newNodeFound then
+			Gatherer_mark_node_as_p2p_duplicate(gatherC, gatherZ, gather, insertedIndex)
+		end
         if Gatherer_Settings.debug then
             if newNodeFound then
 				Gatherer_ChatNotify('It was a new node!', Gatherer_ENotificationType.info)
