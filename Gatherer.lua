@@ -792,7 +792,7 @@ function Gatherer_TimeCheck(timeDelta)
 			));
 			Gatherer_ChatNotify(
 				format(
-					'Sending random node once in %.2f seconds',
+					'Sending random node once in %.4s seconds',
 					adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count)
 				),
 				Gatherer_ENotificationType.sending
