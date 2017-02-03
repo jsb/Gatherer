@@ -421,8 +421,9 @@ function Gatherer_OnEvent(event)
 		-- process gather error message
 		-- need to be in standard gather range to get the correct message to process.
 		if (arg1 and
-		    (strfind(arg1, GATHERER_REQUIRE.." "..OLD_TRADE_HERBALISM) or strfind(arg1, GATHERER_NOSKILL.." "..OLD_TRADE_HERBALISM) or
-		     strfind(arg1, GATHERER_REQUIRE.." "..TRADE_MINING) or strfind(arg1, GATHERER_NOSKILL.." "..TRADE_MINING))) then
+		    (strfind(arg1, GATHERER_REQUIRE.." "..OLD_TRADE_HERBALISM) or strfind(arg1, GATHERER_NOSKILL.." "..OLD_TRADE_HERBALISM) or 
+			strfind(arg1, OLD_TRADE_HERBALISM.." "..GATHERER_NOSKILL) or strfind(arg1, GATHERER_REQUIRE.." "..TRADE_MINING) or
+			strfind(arg1, GATHERER_NOSKILL.." "..TRADE_MINING) or strfind(arg1, TRADE_MINING.." "..GATHERER_NOSKILL))) then
 			Gatherer_ReadBuff(event);
 		end
 	-- process chatmessages
@@ -440,7 +441,7 @@ function Gatherer_OnEvent(event)
 			Gatherer_currentNode = GameTooltipTextLeft1:GetText();
 			Gatherer_currentAction = arg1;
 
-			Gatherer_Debug("Current node: "..Gatherer_currentNode);
+			Gatherer_Debug("Current node: "..(Gatherer_currentNode or "nil"));
 			Gatherer_RecordFlag=1;
 		end
 	elseif ( event == "SPELLCAST_STOP" and Gatherer_RecordFlag == 1 ) then
@@ -1497,7 +1498,8 @@ function Gatherer_MiniMapPos(deltaX, deltaY, scaleX, scaleY) -- works out the di
 	mapDist = Gatherer_Pythag(mapX, mapY);
 	local mapWidth = Minimap:GetWidth()/2;
 	local mapHeight = Minimap:GetHeight()/2;
-	if (Squeenix or (simpleMinimap_Skins and simpleMinimap_Skins:GetShape() == "square")) then
+	if (Squeenix or (pfUI and pfUI_config["disabled"]["minimap"] ~= "1") or 
+		(simpleMinimap_Skins and simpleMinimap_Skins:GetShape() == "square")) then
 		if (math.abs(mapX) > mapWidth) then
 			mapX = (mapWidth)*((mapX<0 and -1) or 1);
 		end
@@ -1548,13 +1550,11 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 		if (string.find(chatline, HERB_GATHER_STRING)) then
 			record = true;
 			gather = string.lower(strsub(chatline, HERB_GATHER_LENGTH, HERB_GATHER_END))
-
 			gatherType = 1;
 			gatherIcon = gather;
 		elseif (string.find(chatline, ORE_GATHER_STRING)) then
 			record = true;
 			gather = string.lower(strsub(chatline, ORE_GATHER_LENGTH, ORE_GATHER_END))
-
 			gatherType = 2;
 			gatherIcon = Gatherer_FindOreType(gather);
 			if (not gatherIcon) then return; end;
@@ -1579,8 +1579,6 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 		elseif (event ~= "UI_ERROR_MESSAGE" ) then
 			chatline = Gatherer_currentAction;
 		end
-		Gatherer_Debug("gather="..gather.." chatline="..chatline);
-
 		-- process non gatherable item because of low/lack of skill
 		if( gather and not gather ~= "" and (strfind(chatline, TRADE_HERBALISM) or strfind(chatline, OLD_TRADE_HERBALISM) or strfind(chatline, GATHER_HERBALISM)) ) then -- Herb
 			Gatherer_Debug("record Herb");
@@ -1599,11 +1597,6 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 			record = true
 			gatherType = 0;
 			gatherIcon, gatherCanonicalName = Gatherer_FindTreasureType(gather);
---			if (not gatherIcon) then
---				Gatherer_Debug("record Treasure, no icon abort record");
---				Gatherer_RecordFlag = 0;
---				return;
---			end;
 			if ( gatherCanonicalName ) then gather = gatherCanonicalName; end;
 			gatherEventType = 1;
 		end
