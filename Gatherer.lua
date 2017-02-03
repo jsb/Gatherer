@@ -421,7 +421,7 @@ function Gatherer_OnEvent(event)
 		-- process gather error message
 		-- need to be in standard gather range to get the correct message to process.
 		if (arg1 and
-		    (strfind(arg1, GATHERER_REQUIRE.." "..OLD_TRADE_HERBALISM) or strfind(arg1, GATHERER_NOSKILL.." "..OLD_TRADE_HERBALISM) or 
+		    (strfind(arg1, GATHERER_REQUIRE.." "..OLD_TRADE_HERBALISM) or strfind(arg1, GATHERER_NOSKILL.." "..OLD_TRADE_HERBALISM) or
 			strfind(arg1, OLD_TRADE_HERBALISM.." "..GATHERER_NOSKILL) or strfind(arg1, GATHERER_REQUIRE.." "..TRADE_MINING) or
 			strfind(arg1, GATHERER_NOSKILL.." "..TRADE_MINING) or strfind(arg1, TRADE_MINING.." "..GATHERER_NOSKILL))) then
 			Gatherer_ReadBuff(event);
@@ -731,16 +731,21 @@ local function selectRandomGather()
 
 	return
 		randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y,
-		randomNode.icon, eventType
+		randomNode.icon, eventType, nodeIndex
 end
 
 
 -- *************************************************************************
 -- Update related functions
 
+local function adjusted_announce_period(announced_period, skipped_cycles_count)
+	return announced_period / (skipped_cycles_count + 1)
+end
+
 local Gatherer_UpdateTicker = 0.0;
-local Gatherer_AnnouncePeriod = 10;
+local Gatherer_AnnouncePeriod = 4;
 local Gatherer_CycleCount = 0;
+local skipped_cycles_count = 0;
 local Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod;
 function Gatherer_TimeCheck(timeDelta)
 	if (not GatherNotes) then
@@ -769,21 +774,34 @@ function Gatherer_TimeCheck(timeDelta)
 	-- than once Gatherer_AnnouncePeriod seconds
 	if Gatherer_Settings.p2p then
 		local args = {selectRandomGather()};
-		-- if failed to get a random node skip cycle
-		if not args[1] then
+
+		local failed_to_get_random_node = not args[1]
+		local was_duplicate = Gatherer_is_p2p_duplicate(args[3], args[4], args[1], args[9])
+		if failed_to_get_random_node or was_duplicate then
+			skipped_cycles_count = skipped_cycles_count + 1
+			Gatherer_SecondsToAnnounce = adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count)
 			return
 		end
+
 		Gatherer_CycleCount = Gatherer_CycleCount + 1
+		-- delete first return value. It isn't needed for broadcasting.
+		args[9] = nil
 		if Gatherer_Settings.debug then
-			Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
+			Gatherer_ChatPrint(format(
+				'Gatherer: Cycle #%d, skipped: %d', Gatherer_CycleCount, skipped_cycles_count
+			));
 			Gatherer_ChatNotify(
-				'Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.',
+				format(
+					'Sending random node once in %.2f seconds',
+					adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count)
+				),
 				Gatherer_ENotificationType.sending
 			);
 			Gatherer_ChatNotify(
 				'args to send: '..table.concat(args, ', '), Gatherer_ENotificationType.sending
 			);
 		end
+		skipped_cycles_count = 0
 		Gatherer_BroadcastGather(unpack(args))
 	end
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
@@ -1498,7 +1516,7 @@ function Gatherer_MiniMapPos(deltaX, deltaY, scaleX, scaleY) -- works out the di
 	mapDist = Gatherer_Pythag(mapX, mapY);
 	local mapWidth = Minimap:GetWidth()/2;
 	local mapHeight = Minimap:GetHeight()/2;
-	if (Squeenix or (pfUI and pfUI_config["disabled"]["minimap"] ~= "1") or 
+	if (Squeenix or (pfUI and pfUI_config["disabled"]["minimap"] ~= "1") or
 		(simpleMinimap_Skins and simpleMinimap_Skins:GetShape() == "square")) then
 		if (math.abs(mapX) > mapWidth) then
 			mapX = (mapWidth)*((mapX<0 and -1) or 1);
@@ -1707,7 +1725,7 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].count = newCount;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = iconIndex
 
-	return newNodeFound;
+	return newNodeFound, insertionIndex;
 end
 
 -- this function can be used as an interface by other addons to record things
