@@ -4,7 +4,7 @@
 -- Imaginary session-long part of the database.
 -- Like imaginary part of a complex nubmer.
 local GatherItems_imaginary = {};
-
+local p2p_duplicates_count = 0;
 
 local function Gatherer_add_imaginary_node_data(continent, zone, gatherName, nodeIndex, key, value)
 	if (not GatherItems_imaginary[continent]) then GatherItems_imaginary[continent] = { }; end
@@ -21,8 +21,15 @@ end
 
 local DUPLICATE_KEY = 'was_p2p_duplicate';
 
+function Gatherer_p2p_duplicates_count()
+	-- type: () -> int
+	return p2p_duplicates_count;
+end
 
 function Gatherer_mark_node_as_p2p_duplicate(continent, zone, gatherName, nodeIndex)
+	if not Gatherer_is_p2p_duplicate(continent, zone, gatherName, nodeIndex) then
+		p2p_duplicates_count = p2p_duplicates_count + 1
+	end
 	Gatherer_add_imaginary_node_data(continent, zone, gatherName, nodeIndex, DUPLICATE_KEY, true)
 end
 

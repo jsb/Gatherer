@@ -389,6 +389,7 @@ function Gatherer_Command(command)
 	end
 end
 
+local GatherItems_node_count = 0;
 -- *************************************************************************
 -- Events Handler
 
@@ -510,11 +511,13 @@ function Gatherer_OnEvent(event)
 			Gatherer_Configuration.Load();
 			Gatherer_apply_locale(Gatherer_Settings.locale);
 			GATHERER_LOADED = true;
-			Gatherer_sanitizeDatabase(GatherItems)
+			Gatherer_sanitizeDatabase(GatherItems);
+			GatherItems_node_count = Gatherer_node_count(GatherItems)
 			Gatherer_OnUpdate(0, true);
 
 			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
 			Gatherer_Print("Locale: "..Gatherer_Settings.locale);
+			Gatherer_Print(format("You've got %d nodes in the database", GatherItems_node_count));
 
 			if (Gatherer_Settings.useMainmap == true) then
 				Gatherer_WorldMapDisplay:SetText("Hide Items");
@@ -790,6 +793,11 @@ function Gatherer_TimeCheck(timeDelta)
 			Gatherer_ChatPrint(format(
 				'Gatherer: Cycle #%d, skipped: %d', Gatherer_CycleCount, skipped_cycles_count
 			));
+			local duplicates_count = Gatherer_p2p_duplicates_count();
+			Gatherer_ChatPrint(format(
+				'Gatherer: duplicates: %d, nodes: %d, chance of skip: %.2f%%',
+				duplicates_count, GatherItems_node_count, duplicates_count*100/GatherItems_node_count
+			))
 			Gatherer_ChatNotify(
 				format(
 					'Sending random node once in %.4s seconds',
@@ -1724,6 +1732,9 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].count = newCount;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = iconIndex
+	if newNodeFound then
+		GatherItems_node_count = GatherItems_node_count + 1;
+	end
 
 	return newNodeFound, insertionIndex;
 end

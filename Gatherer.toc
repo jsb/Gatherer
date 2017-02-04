@@ -13,6 +13,7 @@
 constants.lua
 string.lua
 math.lua
+table.lua
 notifications.lua
 database.lua
 session.lua
