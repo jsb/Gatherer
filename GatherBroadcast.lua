@@ -67,8 +67,24 @@ local function validPrefix(prefix)
 end
 
 
+local function message_accepted_by_type(type, settings)
+	for broadcast_media in Gatherer_EBroadcastMedia do
+		if (strlower(type) == broadcast_media) and (not settings[broadcast_media]) then
+			Gatherer_ChatNotify(
+				format(
+					'type: %s, media: %s, setting: %s', type, broadcast_media, tostring(settings[broadcast_media])
+				),
+				Gatherer_ENotificationType.debug
+			)
+			return false
+		end
+	end
+	return true
+end
+
+
 function Gatherer_AddonMessageEvent(prefix, message, type)
-	if (not Gatherer_Settings.p2p) or (not validPrefix(prefix)) then
+	if (not message_accepted_by_type(type, Gatherer_Settings)) or (not validPrefix(prefix)) then
         return
 	end
 	Gatherer_ReceiveBroadcast(message);

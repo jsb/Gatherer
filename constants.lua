@@ -57,3 +57,9 @@ Gatherer_EBoolean = {
 	[true]='on',
 	[false]='off'
 }
+
+
+Gatherer_EBroadcastMedia = {
+	guild=0,
+	raid=1,
+}

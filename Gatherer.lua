@@ -165,7 +165,8 @@ function Gatherer_Command(command)
 		Gatherer_ChatPrint("  |cffffffff/gather loginfo (on|off)|r - show/hide logon information.");
 		Gatherer_ChatPrint("  |cffffffff/gather filterrec (herbs|mining|treasure)|r - link display filter to recording for selected gathering type");
 		Gatherer_ChatPrint("  |cffffffff/gather debug ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.debug].."]|r - show/hide debug messages");
-		Gatherer_ChatPrint("  |cffffffff/gather p2p ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.p2p].."]|r - enable/disable peer-to-peer functions");
+		Gatherer_ChatPrint("  |cffffffff/gather guild ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.guild].."]|r - enable/disable peer-to-peer exchange with guild");
+		Gatherer_ChatPrint("  |cffffffff/gather raid ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.raid].."]|r - enable/disable peer-to-peer exchange with raid or party");
 		Gatherer_ChatPrint("  |cffffffff/gather locale <locale>|r |cff2040ff["..SETTINGS.locale.."]|r - override the locale, e.g. frFR. Default is set by the client. To reset back to it give no parameter.");
 	elseif (cmd == "options" ) then
 		if ( GathererUI_DialogFrame:IsVisible() ) then
@@ -181,13 +182,13 @@ function Gatherer_Command(command)
 			SETTINGS.debug = false;
 			Gatherer_ChatPrint("Debug messages disabled");
 		end
-	elseif (cmd == "p2p") then
+	elseif (Gatherer_EBroadcastMedia[cmd]) then
 		if (not param or param == "" or param == "on") then
-			SETTINGS.p2p = true;
-			Gatherer_ChatPrint("Peer-to-peer functions enabled");
+			SETTINGS[cmd] = true;
+			Gatherer_ChatPrint(format("Peer-to-peer exchange with %s enabled", cmd));
 		elseif (param == "off") then
-			SETTINGS.p2p = false;
-			Gatherer_ChatPrint("Peer-to-peer functions disabled");
+			SETTINGS[cmd] = false;
+			Gatherer_ChatPrint(format("Peer-to-peer exchange with %s disabled", cmd));
 		end
 	elseif (cmd == "locale") then
 		SETTINGS.locale = param
@@ -775,7 +776,7 @@ function Gatherer_TimeCheck(timeDelta)
 	end
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
-	if Gatherer_Settings.p2p then
+	if Gatherer_Settings.guild then
 		local args = {selectRandomGather()};
 
 		local failed_to_get_random_node = not args[1]
@@ -1772,7 +1773,7 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	end
 
 	local iconIndex = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
-	if Gatherer_Settings.p2p then
+	if Gatherer_Settings.guild then
 		-- Broadcast to guild
 		Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
 	end
