@@ -60,6 +60,8 @@ Gatherer_EBoolean = {
 
 
 Gatherer_EBroadcastMedia = {
-	guild=0,
-	raid=1,
+	guild=1,
+	raid=2,
+	[1]='guild',
+	[2]='raid',
 }
