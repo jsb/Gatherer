@@ -1813,7 +1813,7 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	for bm, bm_name  in ipairs(Gatherer_EBroadcastMedia) do
 		if Gatherer_Settings[bm_name] then
 			-- Broadcast to the current media
-			Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
+			Gatherer_BroadcastGather(bm, gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
 			Gatherer_mark_sent(bm, gatherContinent, gatherZone, gather, inserted_index)
 		end
 	end
