@@ -1,4 +1,4 @@
-This is gatherer_p2p 1.0.2
+This is gatherer_p2p 1.1.0
 
 Its crucial feature is node synchronization via guild chat.
 
@@ -20,6 +20,19 @@ To configure it type `/gather locale enGB`. That'll override `ruRU` locale value
 
 Gatherer_p2p release notes:
 (if first word isn't a verb, + stands for "added", - - "removed", * - "changed", / - "fixed")
+
+* 1.1.0
+  + Duplicate exclusion after random selection.
+    Now every broadcasting, gathering and receiving marks a node as sent.
+    Sent nodes won't be resent until the next session (addon reloading).
+    The purpose is to send out the database as fast as possible.
+    https://github.com/theoden-dd/gatherer_p2p/issues/7
+  * _Initial_ delay was set to 4 seconds. Due to sent miss throttling, its limit tends to 15 seconds
+    That's even more, than previous 10 seconds.
+  + Raid/party broadcasting.
+    https://github.com/theoden-dd/gatherer_p2p/issues/8
+  * Option "p2p" became "guild" and toggles broadcasting to guild.
+  + Option "raid" toggles broadcasting to raid/party and defaults to off.
 
 * 1.0.2 - hotfix
   / bug with random selection from empty database
