@@ -1,4 +1,4 @@
-This is gatherer_p2p 1.0.1
+This is gatherer_p2p 1.0.2
 
 Its crucial feature is node synchronization via guild chat.
 
@@ -20,6 +20,10 @@ To configure it type `/gather locale enGB`. That'll override `ruRU` locale value
 
 Gatherer_p2p release notes:
 (if first word isn't a verb, + stands for "added", - - "removed", * - "changed", / - "fixed")
+
+* 1.0.2 - hotfix
+  / bug with random selection from empty database
+    https://github.com/theoden-dd/gatherer_p2p/issues/14
 
 * 1.0.1 - hotfix
   / RuWow addon incompatibility.
