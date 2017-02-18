@@ -714,8 +714,11 @@ local function selectRandomGather()
 	-- type: () -> Tuple[GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType]
 	-- returns the arguments set for the Gatherer_BroadcastGather function
 	local randomContinent, continentData = random_choice(GatherItems);
+	if not continentData then return nil end
 	local randomZone, zoneData = random_choice(continentData);
+	if not zoneData then return nil end
 	local randomGather, gatherNodes = random_choice(zoneData);
+	if not gatherNodes then return nil end
 	local nodeIndex, randomNode = random_choice(gatherNodes);
 	Gatherer_ChatNotify('randomly selected: '..table.concat(
 		{randomContinent, randomZone, randomGather, nodeIndex}, ', '
