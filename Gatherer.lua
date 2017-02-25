@@ -835,19 +835,22 @@ function Gatherer_TimeCheck(timeDelta)
 --		);
 		if Gatherer_Settings[bm_name] then
 			local node_index, broadcast_args = selectRandomGather();
-
-			local continent, zone, gather_name = broadcast_args[3], broadcast_args[4], broadcast_args[1];
-
-			local failed_to_choose = not gather_name
-			local sent = Gatherer_node_sent(bm, continent, zone, gather_name, node_index)
-			if failed_to_choose or sent then
+			local failed_to_choose = not broadcast_args
+			if failed_to_choose then
 				skip_cycle(bm)
 			else
-				Gatherer_CycleCount = Gatherer_CycleCount + cycle_increment
-				cycle_increment = 0
-				send_node(bm, broadcast_args)
-				Gatherer_mark_sent(bm, continent, zone, gather_name, node_index)
-				skipped_cycles_count[bm] = 0
+				local continent, zone, gather_name = broadcast_args[3], broadcast_args[4], broadcast_args[1];
+				local sent = Gatherer_node_sent(bm, continent, zone, gather_name, node_index)
+
+				if sent then
+					skip_cycle(bm)
+				else
+					Gatherer_CycleCount = Gatherer_CycleCount + cycle_increment
+					cycle_increment = 0
+					send_node(bm, broadcast_args)
+					Gatherer_mark_sent(bm, continent, zone, gather_name, node_index)
+					skipped_cycles_count[bm] = 0
+				end
 			end
 		end
 	end
@@ -1753,6 +1756,13 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 		countIncrement = 0
 	end
 
+	Gatherer_ChatNotify(
+		'Inserting into the DB ' .. table.concat(
+			{gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, tostring(updateCount)}, ', '
+		),
+		Gatherer_ENotificationType.debug
+	)
+	assert(type(iconIndex) == 'number')
 	local newCount;
 	if (GatherItems[gatherC][gatherZ][gather][insertionIndex] == nil) then
 		GatherItems[gatherC][gatherZ][gather][insertionIndex] = { };
@@ -1765,7 +1775,6 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
-	assert(type(iconIndex) == 'number')
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].x = gatherX;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].y = gatherY;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
@@ -1811,6 +1820,13 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	end
 
 	local iconIndex = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
+	if type(iconIndex) ~= 'number' then
+		Gatherer_ChatNotify(
+			'Unable to find iconIndex for '..gatherIcon,
+			Gatherer_ENotificationType.warning
+		)
+		return
+	end
 
 	local _, inserted_index = Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType, true);
 	for bm, bm_name  in ipairs(Gatherer_EBroadcastMedia) do
