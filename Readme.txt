@@ -33,6 +33,7 @@ Gatherer_p2p release notes:
     https://github.com/theoden-dd/gatherer_p2p/issues/8
   * Option "p2p" became "guild" and toggles broadcasting to guild.
   + Option "raid" toggles broadcasting to raid/party and defaults to off.
+  / Incendicite Ore will now be ignored and will not produce an error.
 
 * 1.0.2 - hotfix
   / bug with random selection from empty database
