@@ -29,3 +29,17 @@ function Gatherer_sanitizeDatabase(db)
 		end
 	end
 end
+
+
+function Gatherer_node_count(db)
+	-- type: (GathererDb) -> int
+	local node_count = 0;
+	for continent, continentData in db do
+		for zone, zoneData in continentData do
+			for gather, gatherNodes in zoneData do
+				node_count = node_count + Gatherer_table_length(gatherNodes)
+			end
+		end
+	end
+	return node_count;
+end

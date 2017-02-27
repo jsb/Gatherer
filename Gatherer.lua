@@ -1,7 +1,7 @@
 -- Gatherer
 -- Written by Chandora
 
-GATHERER_VERSION="1.0.2";
+GATHERER_VERSION="1.1.0";
 
 --
 -- Look, seriously a full half of this code is from MapNotes.
@@ -165,7 +165,8 @@ function Gatherer_Command(command)
 		Gatherer_ChatPrint("  |cffffffff/gather loginfo (on|off)|r - show/hide logon information.");
 		Gatherer_ChatPrint("  |cffffffff/gather filterrec (herbs|mining|treasure)|r - link display filter to recording for selected gathering type");
 		Gatherer_ChatPrint("  |cffffffff/gather debug ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.debug].."]|r - show/hide debug messages");
-		Gatherer_ChatPrint("  |cffffffff/gather p2p ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.p2p].."]|r - enable/disable peer-to-peer functions");
+		Gatherer_ChatPrint("  |cffffffff/gather guild ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.guild].."]|r - enable/disable peer-to-peer exchange with guild");
+		Gatherer_ChatPrint("  |cffffffff/gather raid ([on]|off)|r |cff2040ff["..Gatherer_EBoolean[SETTINGS.raid].."]|r - enable/disable peer-to-peer exchange with raid or party");
 		Gatherer_ChatPrint("  |cffffffff/gather locale <locale>|r |cff2040ff["..SETTINGS.locale.."]|r - override the locale, e.g. frFR. Default is set by the client. To reset back to it give no parameter.");
 	elseif (cmd == "options" ) then
 		if ( GathererUI_DialogFrame:IsVisible() ) then
@@ -181,13 +182,13 @@ function Gatherer_Command(command)
 			SETTINGS.debug = false;
 			Gatherer_ChatPrint("Debug messages disabled");
 		end
-	elseif (cmd == "p2p") then
+	elseif (Gatherer_EBroadcastMedia[cmd]) then
 		if (not param or param == "" or param == "on") then
-			SETTINGS.p2p = true;
-			Gatherer_ChatPrint("Peer-to-peer functions enabled");
+			SETTINGS[cmd] = true;
+			Gatherer_ChatPrint(format("Peer-to-peer exchange with %s enabled", cmd));
 		elseif (param == "off") then
-			SETTINGS.p2p = false;
-			Gatherer_ChatPrint("Peer-to-peer functions disabled");
+			SETTINGS[cmd] = false;
+			Gatherer_ChatPrint(format("Peer-to-peer exchange with %s disabled", cmd));
 		end
 	elseif (cmd == "locale") then
 		SETTINGS.locale = param
@@ -389,6 +390,7 @@ function Gatherer_Command(command)
 	end
 end
 
+local GatherItems_node_count = 0;
 -- *************************************************************************
 -- Events Handler
 
@@ -422,7 +424,8 @@ function Gatherer_OnEvent(event)
 		-- need to be in standard gather range to get the correct message to process.
 		if (arg1 and
 		    (strfind(arg1, GATHERER_REQUIRE.." "..OLD_TRADE_HERBALISM) or strfind(arg1, GATHERER_NOSKILL.." "..OLD_TRADE_HERBALISM) or
-		     strfind(arg1, GATHERER_REQUIRE.." "..TRADE_MINING) or strfind(arg1, GATHERER_NOSKILL.." "..TRADE_MINING))) then
+			strfind(arg1, OLD_TRADE_HERBALISM.." "..GATHERER_NOSKILL) or strfind(arg1, GATHERER_REQUIRE.." "..TRADE_MINING) or
+			strfind(arg1, GATHERER_NOSKILL.." "..TRADE_MINING) or strfind(arg1, TRADE_MINING.." "..GATHERER_NOSKILL))) then
 			Gatherer_ReadBuff(event);
 		end
 	-- process chatmessages
@@ -440,7 +443,7 @@ function Gatherer_OnEvent(event)
 			Gatherer_currentNode = GameTooltipTextLeft1:GetText();
 			Gatherer_currentAction = arg1;
 
-			Gatherer_Debug("Current node: "..Gatherer_currentNode);
+			Gatherer_Debug("Current node: "..(Gatherer_currentNode or "nil"));
 			Gatherer_RecordFlag=1;
 		end
 	elseif ( event == "SPELLCAST_STOP" and Gatherer_RecordFlag == 1 ) then
@@ -509,11 +512,13 @@ function Gatherer_OnEvent(event)
 			Gatherer_Configuration.Load();
 			Gatherer_apply_locale(Gatherer_Settings.locale);
 			GATHERER_LOADED = true;
-			Gatherer_sanitizeDatabase(GatherItems)
+			Gatherer_sanitizeDatabase(GatherItems);
+			GatherItems_node_count = Gatherer_node_count(GatherItems)
 			Gatherer_OnUpdate(0, true);
 
 			Gatherer_Print("Gatherer p2p v"..GATHERER_VERSION.." -- Loaded!");
 			Gatherer_Print("Locale: "..Gatherer_Settings.locale);
+			Gatherer_Print(format("You've got %d nodes in the database", GatherItems_node_count));
 
 			if (Gatherer_Settings.useMainmap == true) then
 				Gatherer_WorldMapDisplay:SetText("Hide Items");
@@ -707,7 +712,7 @@ end
 
 
 local function selectRandomGather()
-	-- type: () -> Tuple[GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType]
+	-- type: () -> int, Tuple[GatherName, Gatherer_EGatherType, Continent, Zone, float, float, IconName, EGatherEventType]
 	-- returns the arguments set for the Gatherer_BroadcastGather function
 	local randomContinent, continentData = random_choice(GatherItems);
 	if not continentData then return nil end
@@ -731,19 +736,72 @@ local function selectRandomGather()
 		eventType = 2; -- EGatherEventType.fishing
 	end
 
-	return
+	return nodeIndex, {
 		randomGather, randomNode.gtype, randomContinent, randomZone, randomNode.x, randomNode.y,
 		randomNode.icon, eventType
+	}
 end
 
 
 -- *************************************************************************
 -- Update related functions
 
+local function adjusted_announce_period(announced_period, skipped_cycles_count)
+	return announced_period / (skipped_cycles_count + 1)
+end
+
 local Gatherer_UpdateTicker = 0.0;
-local Gatherer_AnnouncePeriod = 10;
+local Gatherer_AnnouncePeriod = 4;
 local Gatherer_CycleCount = 0;
+local skipped_cycles_count = {
+	[Gatherer_EBroadcastMedia.guild] = 0,
+	[Gatherer_EBroadcastMedia.raid] = 0,
+};
 local Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod;
+
+local function skip_cycle(broadcast_media)
+	-- type: (EBroadcastMedia) -> nil
+	-- Increase skipped cycles count and set shortened delay
+	-- for the next period.
+	-- Side-effects: skiiped_cycles_count, Gatherer_SecondsToAnnounce
+	skipped_cycles_count[broadcast_media] = skipped_cycles_count[broadcast_media] + 1;
+	local adjusted_period = adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count[broadcast_media]);
+
+	local set_by_other_media = Gatherer_SecondsToAnnounce > 0
+	local faster_than_other_media = Gatherer_SecondsToAnnounce > adjusted_period
+	if (not set_by_other_media) or faster_than_other_media then
+		Gatherer_SecondsToAnnounce = adjusted_period
+	end
+end
+
+local function send_node(broadcast_media, args)
+	-- type: (EBroadcastMedia, address) -> nil
+	local sent_count = Gatherer_sent_count(broadcast_media);
+	local bm_name = Gatherer_EBroadcastMedia[broadcast_media]
+	Gatherer_ChatNotify(
+		format([[
+						Cycle #%d, skipped for %s: %d
+							sent to %s: %d/%d nodes, chance of skip: %.2f%%]],
+			Gatherer_CycleCount, bm_name, skipped_cycles_count[broadcast_media],
+			bm_name, sent_count, GatherItems_node_count, sent_count *100/GatherItems_node_count
+		),
+		Gatherer_ENotificationType.debug
+	);
+	if Gatherer_Settings.debug then
+		Gatherer_ChatNotify(
+			format(
+				'Sending random node to %s once in %.4s seconds',
+				bm_name, adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count[broadcast_media])
+			),
+			Gatherer_ENotificationType.sending
+		);
+		Gatherer_ChatNotify(
+			'args to send: '..table.concat(args, ', '), Gatherer_ENotificationType.sending
+		);
+	end
+	Gatherer_BroadcastGather(broadcast_media, unpack(args))
+end
+
 function Gatherer_TimeCheck(timeDelta)
 	if (not GatherNotes) then
 		GatherNotes = { timeDiff=0, checkDiff=0 };
@@ -769,24 +827,32 @@ function Gatherer_TimeCheck(timeDelta)
 	end
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
-	if Gatherer_Settings.p2p then
-		local args = {selectRandomGather()};
-		-- if failed to get a random node skip cycle
-		if not args[1] then
-			return
+	local cycle_increment = 1
+	for bm, bm_name  in ipairs(Gatherer_EBroadcastMedia) do
+--		Gatherer_ChatNotify(
+--			format('media: %s (%d), %s', bm_name, bm, tostring(Gatherer_Settings[bm_name])),
+--			Gatherer_ENotificationType.debug
+--		);
+		if Gatherer_Settings[bm_name] then
+			local node_index, broadcast_args = selectRandomGather();
+			local failed_to_choose = not broadcast_args
+			if failed_to_choose then
+				skip_cycle(bm)
+			else
+				local continent, zone, gather_name = broadcast_args[3], broadcast_args[4], broadcast_args[1];
+				local sent = Gatherer_node_sent(bm, continent, zone, gather_name, node_index)
+
+				if sent then
+					skip_cycle(bm)
+				else
+					Gatherer_CycleCount = Gatherer_CycleCount + cycle_increment
+					cycle_increment = 0
+					send_node(bm, broadcast_args)
+					Gatherer_mark_sent(bm, continent, zone, gather_name, node_index)
+					skipped_cycles_count[bm] = 0
+				end
+			end
 		end
-		Gatherer_CycleCount = Gatherer_CycleCount + 1
-		if Gatherer_Settings.debug then
-			Gatherer_ChatPrint('Gatherer: Cycle #'..Gatherer_CycleCount);
-			Gatherer_ChatNotify(
-				'Sending random node once in '..Gatherer_AnnouncePeriod..' seconds.',
-				Gatherer_ENotificationType.sending
-			);
-			Gatherer_ChatNotify(
-				'args to send: '..table.concat(args, ', '), Gatherer_ENotificationType.sending
-			);
-		end
-		Gatherer_BroadcastGather(unpack(args))
 	end
 	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
@@ -1500,7 +1566,8 @@ function Gatherer_MiniMapPos(deltaX, deltaY, scaleX, scaleY) -- works out the di
 	mapDist = Gatherer_Pythag(mapX, mapY);
 	local mapWidth = Minimap:GetWidth()/2;
 	local mapHeight = Minimap:GetHeight()/2;
-	if (Squeenix or (simpleMinimap_Skins and simpleMinimap_Skins:GetShape() == "square")) then
+	if (Squeenix or (pfUI and pfUI_config["disabled"]["minimap"] ~= "1") or
+		(simpleMinimap_Skins and simpleMinimap_Skins:GetShape() == "square")) then
 		if (math.abs(mapX) > mapWidth) then
 			mapX = (mapWidth)*((mapX<0 and -1) or 1);
 		end
@@ -1551,13 +1618,11 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 		if (string.find(chatline, HERB_GATHER_STRING)) then
 			record = true;
 			gather = string.lower(strsub(chatline, HERB_GATHER_LENGTH, HERB_GATHER_END))
-
 			gatherType = 1;
 			gatherIcon = gather;
 		elseif (string.find(chatline, ORE_GATHER_STRING)) then
 			record = true;
 			gather = string.lower(strsub(chatline, ORE_GATHER_LENGTH, ORE_GATHER_END))
-
 			gatherType = 2;
 			gatherIcon = Gatherer_FindOreType(gather);
 			if (not gatherIcon) then return; end;
@@ -1582,8 +1647,6 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 		elseif (event ~= "UI_ERROR_MESSAGE" ) then
 			chatline = Gatherer_currentAction;
 		end
-		Gatherer_Debug("gather="..gather.." chatline="..chatline);
-
 		-- process non gatherable item because of low/lack of skill
 		if( gather and not gather ~= "" and (strfind(chatline, TRADE_HERBALISM) or strfind(chatline, OLD_TRADE_HERBALISM) or strfind(chatline, GATHER_HERBALISM)) ) then -- Herb
 			Gatherer_Debug("record Herb");
@@ -1602,11 +1665,6 @@ function Gatherer_ReadBuff(event, fishItem, fishTooltip)
 			record = true
 			gatherType = 0;
 			gatherIcon, gatherCanonicalName = Gatherer_FindTreasureType(gather);
---			if (not gatherIcon) then
---				Gatherer_Debug("record Treasure, no icon abort record");
---				Gatherer_RecordFlag = 0;
---				return;
---			end;
 			if ( gatherCanonicalName ) then gather = gatherCanonicalName; end;
 			gatherEventType = 1;
 		end
@@ -1698,6 +1756,13 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 		countIncrement = 0
 	end
 
+	Gatherer_ChatNotify(
+		'Inserting into the DB ' .. table.concat(
+			{gather, gatherType, gatherC, gatherZ, gatherX, gatherY, iconIndex, gatherEventType, tostring(updateCount)}, ', '
+		),
+		Gatherer_ENotificationType.debug
+	)
+	assert(type(iconIndex) == 'number')
 	local newCount;
 	if (GatherItems[gatherC][gatherZ][gather][insertionIndex] == nil) then
 		GatherItems[gatherC][gatherZ][gather][insertionIndex] = { };
@@ -1710,14 +1775,16 @@ function Gatherer_AddGatherToBase(gather, gatherType, gatherC, gatherZ, gatherX,
 	gatherX = math.floor(gatherX * 100)/100;
 	gatherY = math.floor(gatherY * 100)/100;
 
-	assert(type(iconIndex) == 'number')
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].x = gatherX;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].y = gatherY;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].gtype = gatherType;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].count = newCount;
 	GatherItems[gatherC][gatherZ][gather][insertionIndex].icon = iconIndex
+	if newNodeFound then
+		GatherItems_node_count = GatherItems_node_count + 1;
+	end
 
-	return newNodeFound;
+	return newNodeFound, insertionIndex;
 end
 
 -- this function can be used as an interface by other addons to record things
@@ -1753,12 +1820,23 @@ function Gatherer_AddGatherHere(gather, gatherType, gatherIcon, gatherEventType)
 	end
 
 	local iconIndex = Gatherer_GetDB_IconIndex(gatherIcon, gatherType);
-	if Gatherer_Settings.p2p then
-		-- Broadcast to guild
-		Gatherer_BroadcastGather(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
+	if type(iconIndex) ~= 'number' then
+		Gatherer_ChatNotify(
+			'Unable to find iconIndex for '..gatherIcon,
+			Gatherer_ENotificationType.warning
+		)
+		return
 	end
 
-	Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType, true);
+	local _, inserted_index = Gatherer_AddGatherToBase(gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType, true);
+	for bm, bm_name  in ipairs(Gatherer_EBroadcastMedia) do
+		if Gatherer_Settings[bm_name] then
+			-- Broadcast to the current media
+			Gatherer_BroadcastGather(bm, gather, gatherType, gatherContinent, gatherZone, gatherX, gatherY, iconIndex, gatherEventType)
+			Gatherer_mark_sent(bm, gatherContinent, gatherZone, gather, inserted_index)
+		end
+	end
+
 	Gatherer_OnUpdate(0,true);
 	GatherMain_Draw();
 end
