@@ -33,6 +33,21 @@ function Gatherer_sent_count(broadcast_media)
 	return sent_count[broadcast_media];
 end
 
+function Gatherer_reset_sent_mark(broadcast_media)
+	-- type: (EBroadcastMedia) -> nil
+	local sent_key = SENT_KEYS[broadcast_media]
+	for continent, continent_data in GatherItems_imaginary do
+		for zone, zone_data in continent_data do
+			for gather, gather_nodes in zone_data do
+				for node_index in gather_nodes do
+					GatherItems_imaginary[continent][zone][gather][node_index][sent_key] = false
+				end
+			end
+		end
+	end
+	sent_count[broadcast_media] = 0
+end
+
 function Gatherer_mark_sent(broadcast_media, continent, zone, gather_name, node_index)
 	-- type: (EBroadcastMedia, Continent, Zone, GatherName, int) -> nil
 	if not Gatherer_node_sent(broadcast_media, continent, zone, gather_name, node_index) then
