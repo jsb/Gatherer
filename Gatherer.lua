@@ -1,7 +1,7 @@
 -- Gatherer
 -- Written by Chandora
 
-GATHERER_VERSION="1.1.0";
+GATHERER_VERSION="1.1.1";
 
 --
 -- Look, seriously a full half of this code is from MapNotes.

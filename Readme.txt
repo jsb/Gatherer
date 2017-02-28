@@ -1,4 +1,4 @@
-This is gatherer_p2p 1.1.0
+This is gatherer_p2p 1.1.1
 
 Its crucial feature is node synchronization via guild chat.
 
@@ -20,6 +20,11 @@ To configure it type `/gather locale enGB`. That'll override `ruRU` locale value
 
 Gatherer_p2p release notes:
 (if first word isn't a verb, + stands for "added", - - "removed", * - "changed", / - "fixed")
+
+
+* 1.1.1 - hotfix
+  + sent marks reset after sending the whole database.
+    It was crucial for tiny databases.
 
 * 1.1.0
   + Duplicate exclusion after random selection.
