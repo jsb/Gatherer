@@ -767,26 +767,19 @@ local function skip_cycle(broadcast_media)
 	skipped_cycles_count[broadcast_media] = skipped_cycles_count[broadcast_media] + 1;
 	local adjusted_period = adjusted_announce_period(Gatherer_AnnouncePeriod, skipped_cycles_count[broadcast_media]);
 
-	local set_by_other_media = Gatherer_SecondsToAnnounce > 0
-	local faster_than_other_media = Gatherer_SecondsToAnnounce > adjusted_period
-	if (not set_by_other_media) or faster_than_other_media then
-		Gatherer_SecondsToAnnounce = adjusted_period
-	end
+	Gatherer_SecondsToAnnounce = min(Gatherer_SecondsToAnnounce, adjusted_period)
+	Gatherer_ChatNotify(
+		format('Cycle #%d, skipped for %s: %d; delay: %.4s',
+			Gatherer_CycleCount, Gatherer_EBroadcastMedia[broadcast_media], skipped_cycles_count[broadcast_media],
+			Gatherer_SecondsToAnnounce
+		),
+		Gatherer_ENotificationType.debug
+	)
 end
 
 local function send_node(broadcast_media, args)
 	-- type: (EBroadcastMedia, address) -> nil
-	local sent_count = Gatherer_sent_count(broadcast_media);
 	local bm_name = Gatherer_EBroadcastMedia[broadcast_media]
-	Gatherer_ChatNotify(
-		format([[
-						Cycle #%d, skipped for %s: %d
-							sent to %s: %d/%d nodes, chance of skip: %.2f%%]],
-			Gatherer_CycleCount, bm_name, skipped_cycles_count[broadcast_media],
-			bm_name, sent_count, GatherItems_node_count, sent_count *100/GatherItems_node_count
-		),
-		Gatherer_ENotificationType.debug
-	);
 	if Gatherer_Settings.debug then
 		Gatherer_ChatNotify(
 			format(
@@ -812,22 +805,22 @@ function Gatherer_TimeCheck(timeDelta)
 			Gatherer_OnUpdate(0,true);
 		end
 	end
-	Gatherer_UpdateTicker = Gatherer_UpdateTicker + arg1;
-	if( Gatherer_UpdateTicker < 1 ) then
-		return
-	end
-	-- reset seconds counter
-	Gatherer_UpdateTicker = 0.0;
-	-- the code below will run not more frequently
-	-- than once a second
-	Gatherer_SecondsToAnnounce = Gatherer_SecondsToAnnounce - 1
---	Gatherer_Print('Every second '..Gatherer_SecondsToAnnounce..' seconds.')
+--	Gatherer_UpdateTicker = Gatherer_UpdateTicker + arg1;
+--	if( Gatherer_UpdateTicker < 1 ) then
+--		return
+--	end
+--	-- reset seconds counter
+--	Gatherer_UpdateTicker = 0.0;
+--	-- the code below will run not more frequently
+--	-- than once a second
+	Gatherer_SecondsToAnnounce = Gatherer_SecondsToAnnounce - timeDelta
 	if Gatherer_SecondsToAnnounce > 0 then
 		return
 	end
 	-- the code below will run not more frequently
 	-- than once Gatherer_AnnouncePeriod seconds
 	local cycle_increment = 1
+	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 	for bm, bm_name  in ipairs(Gatherer_EBroadcastMedia) do
 --		Gatherer_ChatNotify(
 --			format('media: %s (%d), %s', bm_name, bm, tostring(Gatherer_Settings[bm_name])),
@@ -849,12 +842,31 @@ function Gatherer_TimeCheck(timeDelta)
 					cycle_increment = 0
 					send_node(bm, broadcast_args)
 					Gatherer_mark_sent(bm, continent, zone, gather_name, node_index)
+					local sent_count = Gatherer_sent_count(bm)
+					Gatherer_ChatNotify(
+						format([[
+							Cycle #%d, skipped for %s: %d
+								sent to %s: %d/%d nodes, chance of skip: %.2f%%]],
+							Gatherer_CycleCount, bm_name, skipped_cycles_count[bm],
+							bm_name, sent_count, GatherItems_node_count, sent_count *100/GatherItems_node_count
+						),
+						Gatherer_ENotificationType.debug
+					)
 					skipped_cycles_count[bm] = 0
+					if sent_count == GatherItems_node_count then
+						Gatherer_reset_sent_mark(bm)
+						Gatherer_ChatNotify(
+							format([[
+								Sent whole database to %s during current session. Congratulations!!!
+									All sent marks were reset.]],
+								bm_name
+							)
+						)
+					end
 				end
 			end
 		end
 	end
-	Gatherer_SecondsToAnnounce = Gatherer_AnnouncePeriod
 end
 
 local debug_first_minimap_icon = true;
