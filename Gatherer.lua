@@ -685,6 +685,7 @@ end
 
 
 local function random_choice(t)
+    if not t then return end
     local choiceI = nil;
 	local choiceO = nil;
     local n = 0;
