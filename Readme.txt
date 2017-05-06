@@ -1,4 +1,4 @@
-This is Gatherer_p2p 1.0.0
+This is gatherer_p2p 1.1.0
 
 Its crucial feature is node synchronization via guild chat.
 
@@ -10,6 +10,50 @@ It is based on:
 
 Major version is nailed to "1" for the 1.12.1 client compatible versions.
 In other ways versioning complies with semver.
+
+Versions are compatible on the message level along one decade of the minor version.
+E.g. 1.0.x and 1.9.x are compatible, while 1.0.x and 1.10.x are not.
+
+Note for RuWow addon users:
+The addon was working correctly with disabled translation of the combat log, interface and spells.
+To configure it type `/gather locale enGB`. That'll override `ruRU` locale value inevitably set by RuWow.
+
+Gatherer_p2p release notes:
+(if first word isn't a verb, + stands for "added", - - "removed", * - "changed", / - "fixed")
+
+* 1.1.0
+  + Duplicate exclusion after random selection.
+    Now every broadcasting, gathering and receiving marks a node as sent.
+    Sent nodes won't be resent until the next session (addon reloading).
+    The purpose is to send out the database as fast as possible.
+    https://github.com/theoden-dd/gatherer_p2p/issues/7
+  * _Initial_ delay was set to 4 seconds. Due to sent miss throttling, its limit tends to 15 seconds
+    That's even more, than previous 10 seconds.
+  + Raid/party broadcasting.
+    https://github.com/theoden-dd/gatherer_p2p/issues/8
+  * Option "p2p" became "guild" and toggles broadcasting to guild.
+  + Option "raid" toggles broadcasting to raid/party and defaults to off.
+  / Incendicite Ore will now be ignored and will not produce an error.
+
+* 1.0.2 - hotfix
+  / bug with random selection from empty database
+    https://github.com/theoden-dd/gatherer_p2p/issues/14
+
+* 1.0.1 - hotfix
+  / RuWow addon incompatibility.
+    https://github.com/theoden-dd/gatherer_p2p/issues/5
+  + `locale` option to override locale. This is a hack to overcome RuWow's messing with the locale.
+
+* 1.0.0 (relative to 2.99.2)
+  + Broadcasting of a random node via guild chat every 10 seconds.
+    https://github.com/theoden-dd/gatherer_p2p/issues/3
+  * Broke message format: changed iconName to iconIndex. (7-th message peace at that time)
+    https://github.com/theoden-dd/gatherer_p2p/issues/4
+  + Included square map support via a pull request. Thanks to @laytya for contributing.
+    https://github.com/theoden-dd/gatherer_p2p/pull/2
+  + `p2p` option to toggle broadcasting.
+  + `p2p` and `debug` options to the usage notes with current values.
+
 
 The text below is from the parent addon readme.
 http://gathereraddon.com

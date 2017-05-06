@@ -12,6 +12,19 @@ function Gatherer_split(str, sep)
 end
 
 
+function Gatherer_table_to_string(table)
+	-- type: (dict) -> Text
+	local result_str = ''
+	if not table then
+		return result_str
+	end
+	for k, v in table do
+		result_str = result_str..tostring(k)..': '..tostring(v)..', '
+	end
+	return result_str
+end
+
+
 local function hexColor(color)
 	-- type: (Color) -> HexColor
 	local hexColor = {};

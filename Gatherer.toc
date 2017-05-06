@@ -2,7 +2,7 @@
 ## Title: Gatherer
 ## Title-frFR: Gatherer
 ## Title-deDE: Gatherer
-## Version: 1.0.0
+## Version: 1.1.0
 ## Notes: Gatherer, displays stuff you gather in your minimap and world map
 ## Notes-frFR: Gatherer, affiche les objets recoltes dans la minicarte et la carte du monde
 ## Notes-deDE: Gatherer, zeigt gesammelte Krauter und Erze auf der Minikarte und Weltkarte an
@@ -13,8 +13,11 @@
 constants.lua
 string.lua
 math.lua
+table.lua
 notifications.lua
 database.lua
+session.lua
+
 Gatherer.xml
 GathererUI.xml
 GathererInfo.xml

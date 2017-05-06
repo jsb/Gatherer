@@ -68,11 +68,14 @@ Default_Settings = {
 	-- debug
 	["debug"] = false,
 
-	['p2p'] = true,
+	['guild'] = true,
+	['raid'] = false,
+	['locale'] = GetLocale(),
 }
 
 --set per gather type defaults
-for gatherType, nodeTypes in pairs(Gather_DB_IconIndex) do
+-- fixme: there must be no settings depending on a locale
+for gatherType, nodeTypes in pairs(Gather_DB_IconIndex_default) do
 	Default_Settings.filterRecording[gatherType] = false;
 	Default_Settings.filters[gatherType] = "auto";
 
@@ -111,6 +114,14 @@ function Load()
 		for key, value in pairs(Gatherer_SavedSettings_PerCharacter) do
 			Gatherer_Settings[key] = value;
 		end
+	end
+	Gatherer_ChatNotify(
+		'Gatherer: old p2p setting - '..tostring(Gatherer_Settings.p2p),
+		Gatherer_ENotificationType.debug
+	)
+	if Gatherer_Settings.p2p ~= nil then
+		Gatherer_Settings.guild = Gatherer_Settings.p2p
+		Gatherer_Settings.p2p = nil
 	end
 end
 
