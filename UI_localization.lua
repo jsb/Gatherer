@@ -498,7 +498,7 @@ if GetLocale() == "ruRU" then
 	GathererHelp[8] ="|cffff7f3fРедактор объектов:|r\n\nВ этом диалоге вы можете редактировать объект, нажав на нем Alt+ПКМ. Вы можете изменить имя объекта, его иконку и много другое.\n";
 	GathererHelp.currentPage=1;
 
-	GathererDetails = {}; -- this line MUST NOT be repeated in localization blocks
+--	GathererDetails = {}; -- this line MUST NOT be repeated in localization blocks
 	GathererDetails["description"] = "Показать места собранных трав/руды/сокровищ ";
 	GathererDetails["releaseDate"] = "Август 27, 2006";
 end
@@ -648,6 +648,337 @@ if ( GetLocale() == "deDE" ) then
 	-- BINDING_NAME_GATHERER_BINDING_OPTIONS	= "";
 	-- BINDING_NAME_GATHERER_BINDING_REPORT		= "";
 	-- BINDING_NAME_GATHERER_BINDING_SEARCH		= "";
+end
+
+if ( GetLocale() == "esES" ) then
+-- Quick Menu
+	GATHERER_TEXT_TITLE_BUTTON	= "Opciones de Gatherer";
+	
+	GATHERER_TEXT_TOGGLE_MINIMAP	= "Minimapa ";
+	GATHERER_TEXT_TOGGLE_MAINMAP	= "Mapa del Mundo ";
+	GATHERER_TEXT_TOGGLE_HERBS   	= "Hierbas ";
+	GATHERER_TEXT_TOGGLE_MINERALS	= "Minerales ";
+	GATHERER_TEXT_TOGGLE_TREASURE	= "Tesoros ";
+	GATHERER_TEXT_TOGGLE_REPORT     = "Relato";
+	GATHERER_TEXT_TOGGLE_SEARCH	= "Buscar";
+
+	GATHERER_REPORT_TIP		= "Acceder diálogo del relato.";
+	GATHERER_SEARCH_TIP		= "Acceder diálogo de búsqueda.";
+	GATHERER_MENUTITLE_TIP		= "Acceder diálogo de configuración.";
+	GATHERER_ZMBUTTON_TIP		= "Acceder diálogo de pareja de zona.";
+
+	-- Quick Menu Options
+	GATHERER_TEXT_CONFIG_TITLE      = "Gatherer: Opciones";
+	GATHERER_TAB_MENU_TEXT		= "Menú Rápido";
+
+	GATHERER_TEXT_SHOWONMOUSE       = "Mostrar en pasar el ratón sobre";
+	GATHERER_TEXT_HIDEONMOUSE       = "Esconder sin pasar el ratón sobre";
+	GATHERER_TEXT_SHOWONCLICK       = "Mostrar en hacer clic izquierda";
+	GATHERER_TEXT_HIDEONCLICK       = "Esconder en hacer clic izquierda";
+	GATHERER_TEXT_HIDEONBUTTON      = "Esconder en pulsar botón";
+	GATHERER_TEXT_POSITION          = "Posición";
+	GATHERER_TEXT_RADIUS	        = "Radio";
+	GATHERER_TEXT_HIDEICON		= "Esconder icono de menú";
+
+	GATHERER_SHOWONMOUSE_TIP	= "Mostrar menú en pasar el ratón sobre el ícono.";
+	GATHERER_SHOWONCLICK_TIP	= "Mostrar menú en hacer clic izquierda en el ícono.";
+	GATHERER_HIDEONMOUSE_TIP	= "Esconder menú sin pasar el ratón sobre el ícono.";
+	GATHERER_HIDEONCLICK_TIP	= "Esconder menú en hacer clic izquierda en el ícono.";
+	GATHERER_HIDEONBUTTON_TIP	= "Esconder menú en selección.";
+	GATHERER_HIDEICON_TIP		= "Esconder ícono de minimapa para acceder el menú.";
+	GATHERER_TEXT_POSITION_TIP  	= "Ajustar la posición del ícono de rastreo sobre el borde del minimapa.";
+	GATHERER_TEXT_RADIUS_TIP  	= "Ajustar la posición del ícono de rastreo al centro del minimapa.";
+	GATHERER_TAB_MENU_TEXT_TIP	= "Acceder opciones del menú rápido.";
+
+	-- Globals Options
+	GATHERER_TAB_GLOBALS_TEXT		= "Mundiales";
+
+	GATHERER_TEXT_RAREORE           	= "Emparejar mena/hierbas raros";
+	GATHERER_TEXT_NO_MINICONDIST		= "Ningún ícono debajo de distancia mínima";
+	GATHERER_TEXT_MAPMINDER			= "Activar Map Minder";
+	GATHERER_TEXT_MAPMINDER_VALUE		= "Temporizador Map Minder";
+	GATHERER_TEXT_FADEPERC			= "Porcentaje de Desvanecerse";
+	GATHERER_TEXT_FADEDIST			= "Distancia de Desvanecerse";
+	GATHERER_TEXT_THEME			= "Tema: ";
+	GATHERER_TEXT_MINIIDIST			= "Distancia el ícono mínimo";
+	GATHERER_TEXT_NUMBER			= "Número de mininotas";
+	GATHERER_TEXT_MAXDIST			= "Distancia de mininotas";
+	GATHERER_TEXT_HIDEMININOTES		= "Esconder mininotas";
+	GATHERER_TEXT_TOGGLEWORLDNOTES		= "Nombres de nota mundial largo";
+	GATHERER_TEXT_WMICONSIZEEB		= "Tamaño de ícono de mapa del mundo";
+	GATHERER_TEXT_WMICONALPHAEB		= "Transparencia de ícono de mapa del mundo";
+	GATHERER_TEXT_ALPHAUNDER_MINICON	= "Transparencia debajo mínimo";
+
+	GATHERER_MAPMINDER_TIP			= "Activar/Desactivar Map Minder.";
+	GATHERER_TEXT_MAPMINDER_TIP		= "Ajustar el temporizador Map Minder.";
+	GATHERER_THEME_TIP			= "Asignar tema de ícono.";
+	GATHERER_NOMINIICONDIST_TIP		= "Sin muestra del ícono del minimapa debajo distancia mínima";	
+	GATHERER_RAREORE_TIP			= "Mostrar mena/hierbas comúnes/raros juntos";
+	GATHERER_TEXT_FADEPERC_TIP		= "Ajustar porcentaje de desvanecerse del ícono.";
+	GATHERER_TEXT_FADEDIST_TIP		= "Ajustar distancia de desvanecerse del ícono.";
+	GATHERER_TEXT_MINIIDIST_TIP		= "Ajustar distancia mínima de que aparecer el artículo de ícono.";
+	GATHERER_TEXT_NUMBER_TIP		= "Ajustar número de mininotas mostrado en el minimapa.";
+	GATHERER_TEXT_MAXDIST_TIP		= "Ajustar distancia máxima cuando buscando mininotas para mostrar en el minimapa.";
+	GATHERER_HIDEMININOTES_TIP		= "No mostrar mininotas en el minimapa.";
+	GATHERER_TOGGLEWORLDNOTES_TIP		= "Alternar entre nombre del artículo corto/largo en las notas del mapa del mundo";
+	GATHERER_WMICONSIZEEB_TIP		= "Asignar tamaño de ícono en el mapa del mundo.";
+	GATHERER_WMICONALPHAEB_TIP		= "Asignar transparencia del ícono en el mapa del mundo.";
+	GATHERER_TEXT_ALPHAUNDER_MINICON_TIP 	= "Asignar transparencia del mininota debajo distancia mínima.";
+	
+	GATHERER_TAB_GLOBALS_TEXT_TIP		= "Acceder Opciones Mundiales.";
+	
+	-- Filters Options
+	GATHERER_TAB_FILTERS_TEXT 		= "Filtros";
+
+	GATHERER_TEXT_FILTER_HERBS		= "Hierbas: ";
+	GATHERER_TEXT_FILTER_ORE		= "Mena: ";
+	GATHERER_TEXT_FILTER_TREASURE		= "Tesoro: ";
+	GATHERER_TEXT_LINKRECORD        	= "Anotación de filtro"
+	GATHERER_TEXT_WMFILTERS			= "Filtros en el mapa del mundo";
+	GATHERER_TEXT_DISABLEWMFIX		= "Activar botón Mostrar/Esconder";
+
+	GATHERER_HERBSKLEB_TIP			= "Asignar habilidad mínima de Botánica para mostrar.";
+	GATHERER_ORESKLEB_TIP			= "Asignar hablidad mínima de Minería para mostrar.";
+	GATHERER_HERBDDM_TIP			= "Filtrar hierbas ya mostrado.";
+	GATHERER_OREDDM_TIP			= "Filtrar menas ya mostrado.";
+	GATHERER_TREASUREDDM_TIP		= "Filtrar tesoros ya mostrado.";
+	GATHERER_TEXT_LINKRECORD_TIP		= "Vincular recuerdos al filtros seleccionados.";
+	GATHERER_TEXT_WMFILTERS_TIP		= "Alternar artículos de filtros en el mapa del mundo.";
+	GATHERER_TEXT_DISABLEWMFIX_TIP		= "Activar botón Mostrar/Esconder del mapa del mundo para mostrar artículos";
+
+	GATHERER_TAB_FILTERS_TEXT_TIP		= "Acceder opciones de filtros."
+
+	-- Zone Rematch Dialog
+	GATHERER_TEXT_REMATCH_TITLE		= "Pareja de Zona";
+
+	GATHERER_TEXT_APPLY_REMATCH		= "Applicar pareja de zona:";
+	GATHERER_TEXT_SRCZONE_MISSING		= "Fuente de zona no seleccionado.";
+	GATHERER_TEXT_DESTZONE_MISSING		= "Destino de zona no seleccionado.";
+	GATHERER_TEXT_FIXITEMS			= "Arreglar nombres de artículos";
+	GATHERER_TEXT_LASTMATCH			= "Pareja reciente: ";
+	GATHERER_TEXT_LASTMATCH_NONE		= "Ninguno";
+	GATHERER_TEXT_CONFIRM_REMATCH		= "Confirmar pareja de zona (ADVERTENCIA, modificará los datos)";
+
+	GATHERER_ZM_FIXITEM_TIP			= "Arreglar nombres de artículos, solamente la versión localizada";
+	GATHERER_ZM_SRCDDM_TIP			= "Asignar orden de mapa fuente.";
+	GATHERER_ZM_DESTDDM_TIP			= "Asignar orden de mapa destino.";
+
+	-- Report Dialog
+	GATHERER_TAB_REPORT_TIP			= "Relato de nódulo por zona.";
+	
+	GATHERER_REPORT_LOCATION		= "Ubicación:";
+	GATHERER_REPORT_COL_TYPE		= "Tipo";
+	GATHERER_REPORT_COL_NAME		= "Recolectable";
+	GATHERER_REPORT_COL_PTYPE		= "% Tipo";
+	GATHERER_REPORT_COL_PDENSITY		= "% Densidad";
+	
+	GATHERER_REPORT_SUMMARY			= "Total: # recolectado y nódulos";
+
+	-- Search Dialog
+	GATHERER_TAB_SEARCH_TIP			= "Buscar zona conteniendo artículo específico.";
+	
+	GATHERER_SEARCH_LOCATION		= "Artículo:";
+	GATHERER_SEARCH_COL_CONTINENT		= "Continente";
+	GATHERER_SEARCH_COL_ZONE		= "Zona";
+	GATHERER_SEARCH_COL_PNODE		= "% Nodúlo";
+	GATHERER_SEARCH_COL_PDENSITY		= "% Densidad";
+
+	GATHERER_SEARCH_SUMMARY			= "Encontrado: # nódulos y zonas";
+	
+	-- World Map
+	GATHERER_FILTERDM_TEXT			= "Filtros"
+	GATHERER_FILTERDM_TIP			= "Modificar filtros de artículos."
+
+	-- Bindings
+	BINDING_HEADER_GATHERER_BINDINGS_HEADER		= "Gatherer";
+
+	BINDING_NAME_GATHERER_BINDING_QUICKMENU		= "Mostrar/Esconder Gatherer Menú Rápido";
+	BINDING_NAME_GATHERER_BINDING_OPTIONS		= "Mostrar/Esconder Gatherer Opciones";
+	BINDING_NAME_GATHERER_BINDING_REPORT		= "Mostrar/Esconder Gatherer Relato";
+	BINDING_NAME_GATHERER_BINDING_SEARCH		= "Mostrar/Esconder Gatherer Opciones";
+
+	-- MyAddons Help Pages
+	GathererHelp = {};
+	GathererHelp[1] ="|cffff7f3fTable of Contents|r\n\n1- Quick Menu\n2- Minimap\n3- World Map\n4- Options Dialog\n5- Zone Rematch Dialog\n6- Report Dialog\n7- Search Dialog\n8- Node Editor\n";
+	GathererHelp[2] ="|cffff7f3fQuick Menu:|r\n\nAllows fast access to basic display filters (minimap, world map, herbs, ores and treasures) as well as access to the statistic dialogs (see help pages on Report and Search).\n\nClicking on the menu title will bring up the configuration dialog.\n";
+	GathererHelp[3] ="|cffff7f3fMinimap:|r\n\nThe minimap will display icons for the closest gathers (25 max, according to filters, number of gather to show, max distance to consider, etc.).\n\nMousing over these icons will bring up a tooltip detailing the gatherable name, the number of time a successful gather was performed there and the distance to it from current position (in units and time to get there in a straight line at standard running speed).\n";
+	GathererHelp[4] ="|cffff7f3fWorld Map:|r\n\nThe World Map will display icons for all gathered items in the selected zone (400 max, according to selected filters, etc.).\n\nSince having a great number of items to display may cause lag while trying to access the map, by default the items are shown (there is a toggle in the Filters option tab not to display them all the time, it enables a Show Items button on the world map).\n\nThe World Map also allows access to the Node Editor to do some basic manipulation on the Database, by alt-right clicking on a node.\n";
+	GathererHelp[5] ="|cffff7f3fOptions Dialog:|r\n\nThe option dialog is divided in 3 tabs: Filters, Globals, Quick Menu\n\n|cffff7f3fFilters Tab|r deals with filters related option (including control for the Show/Hide button on the World Map).\n\n|cffff7f3fGlobals Tab|r handles options related to core Gatherer functionnality (most of these are also availale though command line).\n\n|cffff7f3fQuick Menu Tab|r controls the behaviour of the quick menu from the minimap icon (including icon position and show/hide control).\n";
+	GathererHelp[6] ="|cffff7f3fZone Rematch Dialog:|r\n\nThis is mainly a facility for localized WoW clients in which the zone name translations were not complete by the time of the official WoW release.\n\nWhen zone names are changed, zone indexes change too because they are sorted alphabetically.\nThis facility provides transition matrixes to fix these indexes by selecting a Source Zone order (ie. previous one) and a Destination Zone order (ie. current one) identified by the WoW version and prefixed by WoW client language (the fix item checkbox allows item names that have been changed to be fixed).\n\nThis also allows global manipulation of the database, such as changing it's format, this is done with any selected source and destination zone order, for non-localized clients an identify matrix should be used (ie. same source and destination order).\n\n|cffff7f3fDatabase is modified, so keep a backup of your data, just in case.|r\n";
+	GathererHelp[7] ="|cffff7f3fReport Dialog:|r\n\nIn this dialog you can display the items you have collected in the various zones (one zone at a time) for a quick overview.\n\nYou can click on the various column headings to sort (and reverse sort) the display according to that column contents.\n\nMost of the columns are self-explanatory, except for the ones detailed below:\n|cffff7f3fType %:|r\n  Percentage of the ressource compared to number of recorded gather of the same type in zone.\n\n|cffff7f3fDensity %:|r\n  Percentage of the ressource compared to number of recorded gather of the same item worldwide.\n";
+	GathererHelp[8] ="|cffff7f3fSearch Dialog:|r\n\nIn this dialog you can specify an item and display the various zones in which it has already been gathered.\n\nYou can click on the various column headings to sort (and reverse sort) the display according to that column contents.\n\nMost of the columns are self-explanatory, except for the ones detailed below:\n|cffff7f3fNode %:|r\n  Percentage of the ressource compared to the number of nodes in zone.\n\n|cffff7f3fDensity %:|r\n  Percentage of the ressource compared to total matching nodes worldwide.\n";
+	GathererHelp[9] ="|cffff7f3fNode Editor:|r\n\nIn this dialog you (alt-right click on a node in the World Map), you can change the node name, it's icon, toggle it as bugged or delete it.\n\n|cffff7f3fToggle Bugged|r will only work for the current selected node.\n\n|cffff7f3fDelete|r use scope (Node by default to avoid mistakes) and can be extended to Zone, Continent and World scopes.\n\n|cffff7f3fAccept|r will take into account the new node name (remember to hit enter after filling the new name) and/or icon.\nAs for the delete button, this one takes scope into account and can be applied at Node, Zone, Continent and World level.\n";
+	GathererHelp.currentPage=1;
+
+	-- GathererDetails = {}; -- this line MUST NOT be repeated in localization blocks
+	GathererDetails["description"] = "Mostrar ubicaciones de hierbas/menas/tesoros recolectados";
+	GathererDetails["releaseDate"] = "27 de agosto de 2006";
+end
+
+if ( GetLocale() == "koKR" ) then
+	-- Quick Menu
+	GATHERER_TEXT_TITLE_BUTTON		= "Gatherer 옵션";
+	
+	GATHERER_TEXT_TOGGLE_MINIMAP	= "미니맵 ";
+	GATHERER_TEXT_TOGGLE_MAINMAP	= "월드맵 ";
+	GATHERER_TEXT_TOGGLE_HERBS   	= "약초 ";
+	GATHERER_TEXT_TOGGLE_MINERALS	= "광석 ";
+	GATHERER_TEXT_TOGGLE_TREASURE	= "보물함 ";
+	GATHERER_TEXT_TOGGLE_REPORT     = "보고서";
+	GATHERER_TEXT_TOGGLE_SEARCH		= "검색";
+
+	GATHERER_REPORT_TIP				= "대화 보고서창 열기";
+	GATHERER_SEARCH_TIP				= "대화 검색창 열기";
+	GATHERER_MENUTITLE_TIP			= "Gatherer 옵션구성 창 열기";
+	GATHERER_ZMBUTTON_TIP			= "지역 매치창 열기";
+
+	-- Quick Menu Options
+	GATHERER_TEXT_CONFIG_TITLE      = "Gatherer: 옵션설정";
+	GATHERER_TAB_MENU_TEXT			= "퀵 메뉴";
+
+	GATHERER_TEXT_SHOWONMOUSE       = "마우스 오버시 보기";
+	GATHERER_TEXT_HIDEONMOUSE       = "마우스 아웃시 숨기기";
+	GATHERER_TEXT_SHOWONCLICK       = "좌클릭시 보이기";
+	GATHERER_TEXT_HIDEONCLICK       = "좌클릭시 숨기기";
+	GATHERER_TEXT_HIDEONBUTTON      = "버튼 누룰때 숨기기";
+	GATHERER_TEXT_POSITION          = "위치";
+	GATHERER_TEXT_RADIUS	        = "반지름";
+	GATHERER_TEXT_HIDEICON			= "메뉴 아이콘 숨기기";
+
+	GATHERER_SHOWONMOUSE_TIP		= "아이콘을 마우스오버하여 메뉴 표시";
+	GATHERER_SHOWONCLICK_TIP		= "아이콘을 좌클릭하여 메뉴 표시";
+	GATHERER_HIDEONMOUSE_TIP		= "마우스 오버하여 메뉴를 숨김";
+	GATHERER_HIDEONCLICK_TIP		= "아이콘 좌클릭하여 메뉴 숨김";
+	GATHERER_HIDEONBUTTON_TIP		= "선택하여 메뉴 숨김";
+	GATHERER_HIDEICON_TIP			= "메뉴 오픈시 미니맵 아이콘 숨김";
+	GATHERER_TEXT_POSITION_TIP  	= "미니 맵 테두리 주위의 추적 아이콘 위치를 조정합니다.";
+	GATHERER_TEXT_RADIUS_TIP  		= "미니 맵의 중앙에서 추적 아이콘의 위치를 조정합니다.";
+
+	GATHERER_TAB_MENU_TEXT_TIP		= "퀵메뉴 설정옵션 열";
+
+	-- Globals Options
+	GATHERER_TAB_GLOBALS_TEXT		= "전체 옵션설정";
+
+	GATHERER_TEXT_RAREORE           = "두가지 희귀 광석/약초";
+	GATHERER_TEXT_NO_MINICONDIST	= "최소 거리 미만의 아이콘 없음";
+	GATHERER_TEXT_MAPMINDER			= "맵 마인더 활성화";
+	GATHERER_TEXT_MAPMINDER_VALUE	= "맵 마인더 타이머";
+	GATHERER_TEXT_FADEPERC			= "투명도 백분율";
+	GATHERER_TEXT_FADEDIST			= "거리 투명도";
+	GATHERER_TEXT_THEME				= "테마: ";
+	GATHERER_TEXT_MINIIDIST			= "최소 아이콘 거리";
+	GATHERER_TEXT_NUMBER			= "미니노트 번호";
+	GATHERER_TEXT_MAXDIST			= "미니노트 거리";
+	GATHERER_TEXT_HIDEMININOTES		= "미니노트 숨기기";
+	GATHERER_TEXT_TOGGLEWORLDNOTES	= "긴 글 노트네임";
+	GATHERER_TEXT_WMICONSIZEEB		= "세계지도 아이콘 크기";
+	GATHERER_TEXT_WMICONALPHAEB		= "세계지도 아이콘 투명도";
+	GATHERER_TEXT_ALPHAUNDER_MINICON= "분당 투명도";
+
+	GATHERER_MAPMINDER_TIP			= "맵마인더 활성화/비활성화";
+	GATHERER_TEXT_MAPMINDER_TIP		= "맵마인더 타이머 조정";
+	GATHERER_THEME_TIP				= "아이콘 테마 설정";
+	GATHERER_NOMINIICONDIST_TIP		= "최소거리에 미니맵 아이콘 표시되지 않음";	
+	GATHERER_RAREORE_TIP			= "일반/희귀한 광석/약초를 함께 표시";
+	GATHERER_TEXT_FADEPERC_TIP		= "아이콘 투명도 퍼센트 조정" ;
+	GATHERER_TEXT_FADEDIST_TIP		= "아이콘 투명도 거리 조정";
+	GATHERER_TEXT_MINIIDIST_TIP		= "항목 아이콘이 나타나는 최소 거리 조정.";
+	GATHERER_TEXT_NUMBER_TIP		= "미니맵에 표시되는 미니노트 수를 조정합니다";
+	GATHERER_TEXT_MAXDIST_TIP		= "미니맵에 표시 할 미니노트를 찾을 때 고려할 최대 거리를 조정";
+	GATHERER_HIDEMININOTES_TIP		= "미니맵에 미니맵노트를 표시하지 마십시오.";
+	GATHERER_TOGGLEWORLDNOTES_TIP	= "세계지도 메모의 짧고/긴 항목 이름 간 전환";
+	GATHERER_WMICONSIZEEB_TIP		= "세계지도에 아이콘 크기 설정";
+	GATHERER_WMICONALPHAEB_TIP		= "세계지도에서 아이콘 투명도 설정";
+	GATHERER_TEXT_ALPHAUNDER_MINICON_TIP = "최소 거리에서 미니 노트 투명도 설정";
+	
+	GATHERER_TAB_GLOBALS_TEXT_TIP	= "전체 옵션설정 활성화";
+	
+	-- Filters Options
+	GATHERER_TAB_FILTERS_TEXT 		= "필터";
+
+	GATHERER_TEXT_FILTER_HERBS		= "약초: ";
+	GATHERER_TEXT_FILTER_ORE		= "광석: ";
+	GATHERER_TEXT_FILTER_TREASURE	= "보물: ";
+	GATHERER_TEXT_LINKRECORD        = "필터 레코드"
+	GATHERER_TEXT_WMFILTERS			= "세계지도에 필터";
+	GATHERER_TEXT_DISABLEWMFIX		= "표시/숨기기 버튼 사용";
+
+	GATHERER_HERBSKLEB_TIP			= "디스플레이를 위한 최소 약초채집기술 설정";
+	GATHERER_ORESKLEB_TIP			= "디스플레이를 위한 최소 채광 기술 설정";
+	GATHERER_HERBDDM_TIP			= "약초를 보여 주는 필터";
+	GATHERER_OREDDM_TIP				= "광석을 보여 주는 필터";
+	GATHERER_TREASUREDDM_TIP		= "보물을 보여 주는 필터";
+	GATHERER_TEXT_LINKRECORD_TIP	= "선택한 필터에 기록을 연결합니다.";
+	GATHERER_TEXT_WMFILTERS_TIP		= "월드맵에서 항목 필터를 전환합니다.";
+	GATHERER_TEXT_DISABLEWMFIX_TIP	= "항목을 표시하려면 월드맵에서 보기/숨기기 버튼을 활성화합니다.";
+
+	GATHERER_TAB_FILTERS_TEXT_TIP	= "활성화 필터 옵션"
+
+	-- Zone Rematch Dialog
+	GATHERER_TEXT_REMATCH_TITLE		= "지역 재검색";
+
+	GATHERER_TEXT_APPLY_REMATCH		= "지역 재검색 적용:";
+	GATHERER_TEXT_SRCZONE_MISSING	= "소스 지역이 선택되지 않았습니다.";
+	GATHERER_TEXT_DESTZONE_MISSING	= "대상 영역이 선택되지 않았습니다.";
+	GATHERER_TEXT_FIXITEMS			= "항목 이름 수정";
+	GATHERER_TEXT_LASTMATCH			= "마지막 매치: ";
+	GATHERER_TEXT_LASTMATCH_NONE	= "없음";
+	GATHERER_TEXT_CONFIRM_REMATCH	= "지역 재검색 확인 (경고- 데이터 수정 예정).";
+
+	GATHERER_ZM_FIXITEM_TIP			= "수정된 항목 이름,현지화 된 버전만 가능";
+	GATHERER_ZM_SRCDDM_TIP			= "소스 맵 순서 설정";
+	GATHERER_ZM_DESTDDM_TIP			= "대상 맵 순서를 설정하십시오.";
+
+	-- Report Dialog
+	GATHERER_TAB_REPORT_TIP			= "지역별 지점 보고서";
+	
+	GATHERER_REPORT_LOCATION		= "위치:";
+	GATHERER_REPORT_COL_TYPE		= "유형";
+	GATHERER_REPORT_COL_NAME		= "수집";
+	GATHERER_REPORT_COL_PTYPE		= "% 유형";
+	GATHERER_REPORT_COL_PDENSITY	= "% 밀도";
+	
+	GATHERER_REPORT_SUMMARY			= "총계: # 수집하다 & 지점";
+
+	-- Search Dialog
+	GATHERER_TAB_SEARCH_TIP			= "특정 항목이 포함된 지역 검색";
+	
+	GATHERER_SEARCH_LOCATION		= "항목:";
+	GATHERER_SEARCH_COL_CONTINENT	= "대륙";
+	GATHERER_SEARCH_COL_ZONE		= "지역";
+	GATHERER_SEARCH_COL_PNODE		= "% 지점";
+	GATHERER_SEARCH_COL_PDENSITY	= "% 밀도";
+
+	GATHERER_SEARCH_SUMMARY			= "총계: # 수집하다 & 지역";
+	
+	-- World Map
+	GATHERER_FILTERDM_TEXT		= "필터"
+	GATHERER_FILTERDM_TIP		= "항목 필터 수정"
+
+	-- Bindings
+	BINDING_HEADER_GATHERER_BINDINGS_HEADER		= "Gatherer";
+
+	BINDING_NAME_GATHERER_BINDING_QUICKMENU		= "Gatherer 퀵메뉴 보기/감추기";
+	BINDING_NAME_GATHERER_BINDING_OPTIONS		= "Gatherer 옵션설정 보기/감추기";
+	BINDING_NAME_GATHERER_BINDING_REPORT		= "Gatherer 리포트 보기/감추기";
+	BINDING_NAME_GATHERER_BINDING_SEARCH		= "Gatherer 검색 보기/감추기";
+
+	-- MyAddons Help Pages
+	GathererHelp = {};
+	GathererHelp[1] ="|cffff7f3f목차|r\n\n1- 퀵 메뉴\n2- 미니맵\n3- 월드맵\n4- 설정옵션 상자\n5- 지역 재검색 대화상자\n6- 보고서 대화 상자\n7- 검색 대화 상자\n8- 지점 편집기\n";
+	GathererHelp[2] ="|cffff7f3f퀵 메뉴:|r\n\n기본 디스플레이 필터 (미니맵, 세계지도, 채집, 광석, 보물)뿐만 아니라 통계 대화 상자 (보고서 및 검색의 도움말 페이지 참조)에 대한 빠른 액세스를 허용합니다.\n\n메뉴 제목을 클릭하면 구성 대화 상자가 나타납니다.\n";
+	GathererHelp[3] ="|cffff7f3f미니맵:|r\n\n미니 맵은 가장 가까운 Gatherer (25개 최대, 필터, 보여줄 횟수, 고려해야 할 최대 거리 등)에 대한 아이콘을 표시합니다.\n\n이 아이콘 위에 마우스를 가져 가면 집계 이름, 성공한 수집 횟수 및 현재 위치에서의 거리 (표준 실행시 직선으로 표시되는 단위 및 시간)에 대한 툴팁이 나타납니다.\n";
+	GathererHelp[4] ="|cffff7f3fWorld Map:|r\n\nThe World Map will display icons for all gathered items in the selected zone (400 max, according to selected filters, etc.).\n\nSince having a great number of items to display may cause lag while trying to access the map, by default the items are shown (there is a toggle in the Filters option tab not to display them all the time, it enables a Show Items button on the world map).\n\nThe World Map also allows access to the Node Editor to do some basic manipulation on the Database, by alt-right clicking on a node.\n";
+	GathererHelp[5] ="|cffff7f3fOptions Dialog:|r\n\nThe option dialog is divided in 3 tabs: Filters, Globals, Quick Menu\n\n|cffff7f3fFilters Tab|r deals with filters related option (including control for the Show/Hide button on the World Map).\n\n|cffff7f3fGlobals Tab|r handles options related to core Gatherer functionnality (most of these are also availale though command line).\n\n|cffff7f3fQuick Menu Tab|r controls the behaviour of the quick menu from the minimap icon (including icon position and show/hide control).\n";
+	GathererHelp[6] ="|cffff7f3fZone Rematch Dialog:|r\n\nThis is mainly a facility for localized WoW clients in which the zone name translations were not complete by the time of the official WoW release.\n\nWhen zone names are changed, zone indexes change too because they are sorted alphabetically.\nThis facility provides transition matrixes to fix these indexes by selecting a Source Zone order (ie. previous one) and a Destination Zone order (ie. current one) identified by the WoW version and prefixed by WoW client language (the fix item checkbox allows item names that have been changed to be fixed).\n\nThis also allows global manipulation of the database, such as changing it's format, this is done with any selected source and destination zone order, for non-localized clients an identify matrix should be used (ie. same source and destination order).\n\n|cffff7f3fDatabase is modified, so keep a backup of your data, just in case.|r\n";
+	GathererHelp[7] ="|cffff7f3fReport Dialog:|r\n\nIn this dialog you can display the items you have collected in the various zones (one zone at a time) for a quick overview.\n\nYou can click on the various column headings to sort (and reverse sort) the display according to that column contents.\n\nMost of the columns are self-explanatory, except for the ones detailed below:\n|cffff7f3fType %:|r\n  Percentage of the ressource compared to number of recorded gather of the same type in zone.\n\n|cffff7f3fDensity %:|r\n  Percentage of the ressource compared to number of recorded gather of the same item worldwide.\n";
+	GathererHelp[8] ="|cffff7f3fSearch Dialog:|r\n\nIn this dialog you can specify an item and display the various zones in which it has already been gathered.\n\nYou can click on the various column headings to sort (and reverse sort) the display according to that column contents.\n\nMost of the columns are self-explanatory, except for the ones detailed below:\n|cffff7f3fNode %:|r\n  Percentage of the ressource compared to the number of nodes in zone.\n\n|cffff7f3fDensity %:|r\n  Percentage of the ressource compared to total matching nodes worldwide.\n";
+	GathererHelp[9] ="|cffff7f3fNode Editor:|r\n\nIn this dialog you (alt-right click on a node in the World Map), you can change the node name, it's icon, toggle it as bugged or delete it.\n\n|cffff7f3fToggle Bugged|r will only work for the current selected node.\n\n|cffff7f3fDelete|r use scope (Node by default to avoid mistakes) and can be extended to Zone, Continent and World scopes.\n\n|cffff7f3fAccept|r will take into account the new node name (remember to hit enter after filling the new name) and/or icon.\nAs for the delete button, this one takes scope into account and can be applied at Node, Zone, Continent and World level.\n";
+	GathererHelp.currentPage=1;
+
+	GathererDetails = {}; -- this line MUST NOT be repeated in localization blocks
+	GathererDetails["description"] = "수집된 채집/광석/보물 위치 표시";
+	GathererDetails["releaseDate"] = "2006년 8월 27일";
 end
 
 -- localized by biAji
