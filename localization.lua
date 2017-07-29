@@ -704,7 +704,7 @@ elseif ( GetLocale() == "ruRU" ) then
 	GATHERER_ReceivesLoot		= "Ваша добыча: (.+)%.";
 
 	function Gatherer_FindOreType(input)
-		if ( string.find(input, "едная") and string.find(input, "жила") ) then --cooper
+		if ( string.find(input, "едная") and string.find(input, "жила") ) then --copper
 			return ORE_COPPER;
 		elseif ( string.find(input, "ловянная") and string.find(input, "жила") ) then --tin
 			return ORE_TIN;
@@ -758,6 +758,369 @@ elseif ( GetLocale() == "ruRU" ) then
 	end
 
 TYPE_RARE		= "Редкое";
+elseif ( GetLocale() == "esES" ) then
+TYPE_RARE		= "Raro";
+	-- Spanish localized variables
+	GATHERER_VERSION_WARNING="Nueva versión de Gatherer detectado, verifica pareja de zona.";
+	GATHERER_NOTEXT="([-]) no hay texto"
+
+	-- TRADE NAME
+	TRADE_HERBALISM="Botánica"
+	OLD_TRADE_HERBALISM="Botánica"
+	TRADE_MINING="Minería"
+	TRADE_OPENING="Abriendo"
+	GATHER_HERBALISM="Recolectar Hierbas"
+
+	-- strings for gather line in chat
+	HERB_GATHER_STRING="Recolectas Hierbas en"
+	ORE_GATHER_STRING="Recolectas Minerales en"
+	TREASURE_GATHER_STRING="Abres"
+
+	-- Length of the string to keep the gather name
+	HERB_GATHER_LENGTH=31
+	HERB_GATHER_END=-2
+	ORE_GATHER_LENGTH=23
+	ORE_GATHER_END=-2
+	TREASURE_GATHER_LENGTH=24
+	TREASURE_GATHER_END=-2
+
+	GATHERER_REQUIRE="Requiere"
+	GATHERER_NOSKILL="Requiere"
+
+	-- ore classes
+	ORE_CLASS_VEIN   ="filón"
+	ORE_CLASS_DEPOSIT="depósito"
+
+	-- ore types
+	ORE_COPPER    ="cobre"
+	ORE_TIN       ="estaño"
+	ORE_IRON      ="hierro"
+	ORE_SILVER    ="plata"
+	ORE_TRUESILVER="veraplata"
+	ORE_GOLD      ="oro"
+	ORE_MITHRIL   ="mitril"
+	ORE_THORIUM   ="torio"
+	ORE_RTHORIUM  ="torio (rico)"
+	ORE_DARKIRON  ="hierro negro"
+
+	-- herb types 
+	HERB_ARTHASTEAR        ="lágrimas de arthas"
+	HERB_BLACKLOTUS        ="loto negro"
+	HERB_BLINDWEED         ="carolina"
+	HERB_BRIARTHORN        ="brezoespina"
+	HERB_BRUISEWEED        ="hierba cardenal"
+	HERB_DREAMFOIL         ="hojasueño"
+	HERB_EARTHROOT         ="raiz de tierra"
+	HERB_FADELEAF          ="pálida"
+	HERB_FIREBLOOM         ="flor de fuego"
+	HERB_GHOSTMUSHROOM     ="champiñón fantasma"
+	HERB_GOLDENSANSAM      ="sansam dorado"
+	HERB_GOLDTHORN         ="espina de oro"
+	HERB_GRAVEMOSS         ="musgo de tumba"
+	HERB_GROMSBLOOD        ="gromsanguina"
+	HERB_ICECAP            ="setelo"
+	HERB_KHADGARSWHISKER   ="mostacho de Khadgar"
+	HERB_KINGSBLOOD        ="sangrerregia"
+	HERB_LIFEROOT          ="vidarraíz"
+	HERB_MAGEROYAL         ="marregal"
+	HERB_MOUNTAINSILVERSAGE="salviargenta de montaña"
+	HERB_PEACEBLOOM        ="flor de paz"
+	HERB_PLAGUEBLOOM       ="musgopena"
+	HERB_PURPLELOTUS       ="loto cárdeno"
+	HERB_SILVERLEAF        ="hojaplata"
+	HERB_STRANGLEKELP      ="alga estanguladora"
+	HERB_SUNGRASS          ="solea"
+	HERB_SWIFTTHISTLE      ="cardopresto"
+	HERB_WILDSTEELBLOOM    ="acérita salvaje"
+	HERB_WINTERSBITE       ="dientes de dragón"
+	HERB_WILDVINE	       ="atriplex salvaje"
+
+	-- treasure types
+	TREASURE_BOX        	="caja"
+	TREASURE_CHEST      	="arqueta"
+	TREASURE_CLAM       	="almeja gigante"
+	TREASURE_CRATE      	="cajón"
+	TREASURE_BARREL     	="barrica"
+	TREASURE_CASK       	="tonel"
+	TREASURE_SHELLFISHTRAP	="trampa para marisco"
+	TREASURE_FOOTLOCKER 	="baúl"
+
+	TREASURE_BLOODHERO  	= "sangre de héroes"
+
+	TREASURE_UNGOROSOIL 	= "tierra de un'goro"
+	TREASURE_UNGOROSOIL_G	= "montón de porquería"
+	TREASURE_BLOODPETAL 	= "sangrepétalo"
+	TREASURE_BLOODPETAL_G 	= "brote sangrepétalo"
+	TREASURE_POWERCRYST 	= "cristal de poder"
+
+	TREASURE_NIGHTDRAGON 	= "dragón nocturno"
+	TREASURE_WHIPPERROOT 	= "blancoria"
+	TREASURE_WINDBLOSSOM 	= "flor del viento"
+	TREASURE_SONGFLOWER 	= "melodía"
+
+	TREASURE_FISHNODE_TRIGGER1	= "valija";
+--	TREASURE_FISHNODE_TRIGGER2	= "Bloated"; -- no longer found in wreckage in 1.11
+	TREASURE_FISHNODE_TRIGGER3	= "banco";
+	TREASURE_FISHNODE_TRIGGER4	= "banco";
+	TREASURE_FISHNODE_TRIGGER5	= "restos de un naufragio";
+	TREASURE_FISHNODE_TRIGGER6	= "derrame de petróleo";
+	TREASURE_FISHNODE_TRIGGER7	= "parche de agua elemental";
+
+	TREASURE_FISHNODE		= "banco";
+	TREASURE_FISHWRECK		= TREASURE_FISHNODE_TRIGGER5;
+	TREASURE_FISHELEM		= TREASURE_FISHNODE_TRIGGER7;
+
+	GATHERER_ReceivesLoot		= "Recibes el botín: (.+)%.";
+
+	TREASURE_REGEX = {
+		[1] = " ([^ ]+)$",
+		[2] = "^([^ ]+)",
+		[3] = "([^ ]+) ([^ ]+) ",
+	};
+
+	function Gatherer_FindOreType(input)
+		local i,j, oreType, oreClass, oreTypeClass;
+		
+		if ( string.find(input, "rico") and string.find(input, "torio") ) then 
+			return ORE_RTHORIUM;
+		end;
+			
+		if ( string.find(input, "negro") and string.find(input, "hierro") ) then
+                        return ORE_DARKIRON;
+                end
+
+		i,j, oreType, oreClass = string.find(input, "([^ ]+) ([^ ]+)$");
+		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
+			return oreType;
+		end
+		return;
+	end
+
+	function Gatherer_FindTreasureType(in_input)
+		local iconName, input;
+
+		input = string.gsub(in_input, GATHERER_NOTEXT, "")
+
+		if ( string.find(input, TREASURE_UNGOROSOIL_G) or string.find(input, TREASURE_UNGOROSOIL)) then
+			return TREASURE_UNGOROSOIL, TREASURE_UNGOROSOIL;
+		end
+			
+		if (string.find(input, TREASURE_POWERCRYST) ) then
+			return TREASURE_POWERCRYST, TREASURE_POWERCRYST;
+		end
+
+		if (string.find(input, TREASURE_BLOODPETAL_G) or string.find(input, TREASURE_BLOODPETAL)) then
+			return TREASURE_BLOODPETAL, TREASURE_BLOODPETAL_G;
+		end
+
+		if (string.find(input, TREASURE_BLOODHERO) ) then
+			return TREASURE_BLOODHERO, TREASURE_BLOODHERO;
+		end
+
+		for iconName in Gather_DB_IconIndex[0] do
+			local index, treasure_regex, i, j, treasType;
+			if ( input == iconName ) then
+				return iconName;
+			end
+			
+			if ( string.find(input, iconName) ) then
+				for index, treasure_regex in TREASURE_REGEX do
+					i,j, treasType = string.find(input, treasure_regex);
+					if ( treasType and treasType == iconName ) then
+						return iconName;
+					end
+					
+					i,j, _, treasType = string.find(input, treasure_regex);
+					if ( treasType and treasType == iconName ) then
+						return iconName;
+					end
+				end
+			end
+		end
+		return;
+	end
+
+elseif ( GetLocale() == "koKR" ) then
+	-- Korea localized variables (default)
+	GATHERER_VERSION_WARNING="새로운 Gatherer 버전이 검색되었습니다. 지역 일치 여부를 확인하십시오.";
+	GATHERER_NOTEXT="([-]) 텍스트 없음 "
+
+	-- TRADE NAME
+	TRADE_HERBALISM="약초채집"
+	OLD_TRADE_HERBALISM="약초채집"
+	TRADE_MINING="채광"
+	TRADE_OPENING="여는 중"
+	GATHER_HERBALISM="약초 수집중"
+
+	-- strings for gather line in chat
+	HERB_GATHER_STRING="당신은 약초채집을 수행합니다."
+	ORE_GATHER_STRING="당신은 채광을 수행합니다."
+	TREASURE_GATHER_STRING="당신은 여는 중 입니다."
+
+	-- Length of the string to keep the gather name
+	HERB_GATHER_LENGTH=31
+	HERB_GATHER_END=-2
+	ORE_GATHER_LENGTH=23
+	ORE_GATHER_END=-2
+	TREASURE_GATHER_LENGTH=24
+	TREASURE_GATHER_END=-2
+
+	GATHERER_REQUIRE="요구사항"
+	GATHERER_NOSKILL="요구사항"
+
+	-- ore classes
+	ORE_CLASS_VEIN   ="광맥"
+	ORE_CLASS_DEPOSIT="광맥"
+
+	-- ore types
+	ORE_COPPER    = "구리"
+	ORE_TIN       = "주석"
+	ORE_IRON      = "철"
+	ORE_SILVER    = "은"
+	ORE_TRUESILVER= "진은"
+	ORE_GOLD      = "금"
+	ORE_MITHRIL   = "미스릴"
+	ORE_THORIUM   = "토륨"
+	ORE_RTHORIUM  = "풍부한 토륨"
+	ORE_DARKIRON  = "검은 무쇠"
+
+	-- herb types 
+	HERB_ARTHASTEAR        = "아서스의 눈물"
+	HERB_BLACKLOTUS        = "검은 연꽃"
+	HERB_BLINDWEED         = "실명초"
+	HERB_BRIARTHORN        = "찔레가시"
+	HERB_BRUISEWEED        = "생채기풀"
+	HERB_DREAMFOIL         = "꿈풀"
+	HERB_EARTHROOT         = "뱀뿌리"
+	HERB_FADELEAF          = "미명초잎"
+	HERB_FIREBLOOM         = "화염초"
+	HERB_GHOSTMUSHROOM     = "유령버섯"
+	HERB_GOLDENSANSAM      = "황금 산삼"
+	HERB_GOLDTHORN         = "황금가시"
+	HERB_GRAVEMOSS         = "무덤이끼"
+	HERB_GROMSBLOOD        = "그롬의 피"
+	HERB_ICECAP            = "얼음송이"
+	HERB_KHADGARSWHISKER   = "카드가의 수염"
+	HERB_KINGSBLOOD        = "왕꽃잎풀"
+	HERB_LIFEROOT          = "생명의 뿌리"
+	HERB_MAGEROYAL         = "마법초 꽃잎"
+	HERB_MOUNTAINSILVERSAGE= "은초롱이"
+	HERB_PEACEBLOOM        = "평온초 꽃잎"
+	HERB_PLAGUEBLOOM       = "역병초"
+	HERB_PURPLELOTUS       = "보라 연꽃"
+	HERB_SILVERLEAF        = "은엽수잎"
+	HERB_STRANGLEKELP      = "갈래물풀"
+	HERB_SUNGRASS          = "태양풀"
+	HERB_SWIFTTHISTLE      = "토끼엉겅퀴풀"
+	HERB_WILDSTEELBLOOM    = "야생 철쭉"
+	HERB_WINTERSBITE       = "겨울서리풀"
+	HERB_WILDVINE	       = "야생덩굴"
+
+	-- treasure types
+	TREASURE_BOX        	= "상자"
+	TREASURE_CHEST      	= "보물 상자"
+	TREASURE_CLAM       	= "대합"
+	TREASURE_CRATE      	= "상자"
+	TREASURE_BARREL     	= "통"
+	TREASURE_CASK       	= "과즙통"
+	TREASURE_SHELLFISHTRAP	= "가재 통발"
+	TREASURE_FOOTLOCKER 	= "사물함"
+
+	TREASURE_BLOODHERO  	= "영웅의 피"
+
+	TREASURE_UNGOROSOIL 	= "운고로 토양"
+	TREASURE_UNGOROSOIL_G	= "운고로 토양"
+	TREASURE_BLOODPETAL 	= "붉은꽃잎덩굴손"
+	TREASURE_BLOODPETAL_G 	= "붉은꽃잎덩굴손 씨눈"
+	TREASURE_POWERCRYST 	= "마력의 수정"
+
+	TREASURE_NIGHTDRAGON 	= "어둠용의 숨결"
+	TREASURE_WHIPPERROOT 	= "채찍뿌리 줄기"
+	TREASURE_WINDBLOSSOM 	= "바람꽃 열매"
+	TREASURE_SONGFLOWER 	= "노래꽃"
+
+	TREASURE_FISHNODE_TRIGGER1	= "트렁크";
+--	TREASURE_FISHNODE_TRIGGER2	= "Bloated"; -- no longer found in wreckage in 1.11
+	TREASURE_FISHNODE_TRIGGER3	= "떼";
+	TREASURE_FISHNODE_TRIGGER4	= "물고기 떼";
+	TREASURE_FISHNODE_TRIGGER5	= "표류하는 잔해";
+	TREASURE_FISHNODE_TRIGGER6	= "기름 유출";
+	TREASURE_FISHNODE_TRIGGER7	= "patch of elemental water";
+
+	TREASURE_FISHNODE		= "물고기 떼";
+	TREASURE_FISHWRECK		= TREASURE_FISHNODE_TRIGGER5;
+	TREASURE_FISHELEM		= TREASURE_FISHNODE_TRIGGER7;
+
+	GATHERER_ReceivesLoot		= "당신이 받은 전리품: (.+)%.";
+
+	TREASURE_REGEX = {
+		[1] = " ([^ ]+)$",
+		[2] = "^([^ ]+)",
+		[3] = "([^ ]+) ([^ ]+) ",
+	};
+
+	function Gatherer_FindOreType(input)
+		local i,j, oreType, oreClass, oreTypeClass;
+		
+		if ( string.find(input, "풍부한") and string.find(input, "토륨") ) then 
+			return ORE_RTHORIUM;
+		end;
+			
+		if ( string.find(input, "검은") and string.find(input, "무쇠") ) then
+                        return ORE_DARKIRON;
+                end
+
+		i,j, oreType, oreClass = string.find(input, "([^ ]+) ([^ ]+)$");
+		if (oreType and oreClass and ((oreClass == ORE_CLASS_VEIN) or (oreClass == ORE_CLASS_DEPOSIT))) then
+			return oreType;
+		end
+		return;
+	end
+
+	function Gatherer_FindTreasureType(in_input)
+		local iconName, input;
+
+		input = string.gsub(in_input, GATHERER_NOTEXT, "")
+
+		if ( string.find(input, TREASURE_UNGOROSOIL_G) or string.find(input, TREASURE_UNGOROSOIL)) then
+			return TREASURE_UNGOROSOIL, TREASURE_UNGOROSOIL;
+		end
+			
+		if (string.find(input, TREASURE_POWERCRYST) ) then
+			return TREASURE_POWERCRYST, TREASURE_POWERCRYST;
+		end
+
+		if (string.find(input, TREASURE_BLOODPETAL_G) or string.find(input, TREASURE_BLOODPETAL)) then
+			return TREASURE_BLOODPETAL, TREASURE_BLOODPETAL_G;
+		end
+
+		if (string.find(input, TREASURE_BLOODHERO) ) then
+			return TREASURE_BLOODHERO, TREASURE_BLOODHERO;
+		end
+
+		for iconName in Gather_DB_IconIndex[0] do
+			local index, treasure_regex, i, j, treasType;
+			if ( input == iconName ) then
+				return iconName;
+			end
+			
+			if ( string.find(input, iconName) ) then
+				for index, treasure_regex in TREASURE_REGEX do
+					i,j, treasType = string.find(input, treasure_regex);
+					if ( treasType and treasType == iconName ) then
+						return iconName;
+					end
+					
+					i,j, _, treasType = string.find(input, treasure_regex);
+					if ( treasType and treasType == iconName ) then
+						return iconName;
+					end
+				end
+			end
+		end
+		return;
+	end
+
 
 else
 	-- English localized variables (default)
