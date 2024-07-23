@@ -1398,6 +1398,7 @@ end
 function Gatherer_AbsCoord(continent, zone, x, y)
 	if ((continent == 0) or (zone == 0)) then return x, y; end
 	local r = GatherRegionData[continent][zone];
+	if r == nil then return 0, 0; end
 	local absX = x * r.scale + r.xoffset;
 	local absY = y * r.scale + r.yoffset;
 	return absX, absY;
